@@ -1,0 +1,50 @@
+/* ========================================
+   Card Components (Syncfusion & Custom)
+   ======================================== */
+
+.e-card {
+    background-color: #34b1aa5c !important;
+}
+.e-card .e-card-actions a {
+    border-color: var(--color-orange-red) !important;
+    color: var(--color-orange-red) !important;
+}
+
+.announcementpage .e-card-content {
+    height: 175px;
+    max-width: 600px;
+    overflow: auto;
+}
+
+.achievementspage .e-card-content {
+    height: 115px;
+    max-width: 600px;
+    overflow: auto;
+}
+
+.policiespage .e-card-content {
+    height: 250px;
+    overflow: auto;
+}
+
+.e-card .e-card-actions .e-card-btn, .e-card .e-card-actions a {
+    border: 1px solid var(--color-orange-red) !important;
+    color: var(--color-orange-red) !important;
+}
+
+    .e-card .e-card-actions .e-card-btn:hover, .e-card .e-card-actions a:hover {
+        border: 1px solid var(--color-light-green) !important;
+        color: white !important;
+        background-color: var(--color-orange-red) !important;
+    }
+
+.e-card .e-card-header .e-card-header-caption .e-card-header-title {
+    font-weight: bold !important;
+}
+
+.e-card-resize-container .row{
+    margin: 0;
+}
+.card-layout.row {
+    margin: 10px 0 0 0;
+}

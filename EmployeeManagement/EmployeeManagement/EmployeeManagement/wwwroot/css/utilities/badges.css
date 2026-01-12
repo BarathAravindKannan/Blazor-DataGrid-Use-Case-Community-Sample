@@ -1,0 +1,22 @@
+/* ========================================
+   Badge Utilities (Leave Types & Status)
+   ======================================== */
+
+.e-badge {
+    color: var(--color-bg);
+}
+.badge-casual {
+    background-color: var(--bgcolor-badge-casual);
+}
+
+.badge-sick {
+    background-color: var(--bgcolor-badge-sick);
+}
+
+.badge-earned {
+    background-color: var(--bgcolor-badge-earned);
+}
+
+.badge-request {
+    background-color: var(--bgcolor-badge-request);
+}

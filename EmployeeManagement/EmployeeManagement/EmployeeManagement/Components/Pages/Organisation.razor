@@ -1,0 +1,145 @@
+﻿@page "/organization"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@inject NavigationManager UriHelper
+@using static EmployeeManagement.Components.Pages.Home
+
+<div class="employeespage">
+      @* <div class="employees-header"> *@
+      @*   <div>Organization</div> *@
+      @* </div> *@
+      <div class="employees-content">
+          <SfTab Height="auto"> 
+              <TabItems>
+                  <TabItem>
+                      <ChildContent>
+                          <TabHeader Text="Employees"></TabHeader>
+                      </ChildContent>
+                      <ContentTemplate>
+                          <div class="tab-content teamGridContainer">
+                            <SfGrid DataSource="EmployeesDetails.GetAllEmployeeRecords()" Height="400" Width="100%" ID="employees_grid" AllowPaging=true AllowGrouping=true AllowSorting=true AllowFiltering=true ShowColumnChooser=true Toolbar="@(new List<string>() { "ColumnChooser", "Search" })" RowHeight="50">
+                                    <GridPageSettings PageSize="10"></GridPageSettings>
+                                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                                    <GridColumns>
+                                        <GridColumn HeaderText="Image" Width="80" AllowFiltering=false AllowSorting=false AllowGrouping=false TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var employee = (context as EmployeesDetails);
+                                                    if(!string.IsNullOrEmpty(employee.ProfileImgPath))
+                                                    {
+                                                        <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border"/>
+                                                    }
+                                                    else
+                                                    {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 15" color="rgba(0, 0, 0, .54)">
+                                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                                                            <path fillRule="evenodd"
+                                                                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                                                        </svg>
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.EmployeeCode) HeaderText="ID" Width="120">
+                                            <Template>
+                                                @{
+                                                    var employee = (context as EmployeesDetails);
+                                                     <SfTooltip ID="content" CssClass="e-tooltip-template-css">
+                                                        <ContentTemplate>
+                                                            <div id="democontent" class="democontent">
+                                                                <div style="display: flex; padding: 4px 4px 0 4px">
+                                                                    @if(!string.IsNullOrEmpty(employee.ProfileImgPath))
+                                                                    {
+                                                                        <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)">
+                                                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path>
+                                                                            <path fillrule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path>
+                                                                        </svg>
+                                                                    }
+                                                                    <div style="padding: 0 0 0 10px">
+                                                                        <div>@employee.Name</div>
+                                                                        <div>@employee.Designation</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ContentTemplate>
+                                                        <ChildContent>
+                                                        <a class="employee-popover" href="#" @onclick=@(() => RecordClickHandler(employee))>
+                                                                @employee.EmployeeCode
+                                                            </a>        
+                                                        </ChildContent>
+                                                    </SfTooltip>
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.Name) HeaderText="Name" Width="150">
+                                        <Template>
+                                            @{
+                                                var employee = (context as EmployeesDetails);
+
+                                                <SfTooltip ID="content" CssClass="e-tooltip-template-css">
+                                                    <ContentTemplate>
+                                                        <div id="democontent" class="democontent">
+                                                            <div style="display: flex; padding: 4px 4px 0 4px">
+                                                                @if (!string.IsNullOrEmpty(employee.ProfileImgPath))
+                                                                {
+                                                                    <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)">
+                                                                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path>
+                                                                        <path fillrule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path>
+                                                                    </svg>
+                                                                }
+                                                                <div style="padding: 0 0 0 10px">
+                                                                    <div>@employee.Name</div>
+                                                                    <div>@employee.Designation</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </ContentTemplate>
+                                                    <ChildContent>
+                                                        <span class="emp-name">@employee.Name</span>
+                                                    </ChildContent>
+                                                </SfTooltip>
+                                            }
+                                        </Template>
+                                        </GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.Mail) HeaderText="Mail" Width="260" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.Designation) HeaderText="Designation" ClipMode="ClipMode.EllipsisWithTooltip" Width="260"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.DateOfJoining) HeaderText="Date Of Joining" Type="ColumnType.DateOnly" Format="MMM dd,yyyy" TextAlign="TextAlign.Right" Width="150"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.Branch) HeaderText="Branch" ClipMode="ClipMode.EllipsisWithTooltip" Width="120"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.Team) HeaderText="Team(s)" ClipMode="ClipMode.EllipsisWithTooltip" Width="220"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.TeamLead) HeaderText="Reporter" Width="150" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+                                        <GridColumn Field=@nameof(EmployeesDetails.ManagerName) HeaderText="Manager" ClipMode="ClipMode.EllipsisWithTooltip" Width="150"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                          </div>
+                         
+                      </ContentTemplate>
+                  </TabItem>
+              </TabItems>
+          </SfTab>
+        
+      </div>
+</div>
+
+@code{
+    // [Parameter]
+    // public EventCallback<EmployeesDetails> SelectedEmployee { get; set; }
+
+    private void RecordClickHandler(EmployeesDetails employee)
+    {
+        // UriHelper.NavigateTo($"{Orders.Link}/{Orders.EmployeeID.ToString()}/{Orders.Name}/{Orders.Title}");
+        UriHelper.NavigateTo($"/employee/{employee.EmployeeCode}");
+        // UriHelper.NavigateTo($"/asd/{employee.EmployeeCode}");
+        // UriHelper.NavigateTo("/asd");
+    }
+}

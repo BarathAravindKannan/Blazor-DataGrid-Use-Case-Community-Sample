@@ -1,0 +1,143 @@
+@page "/employee/{EmployeeCode}"
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+
+<div class="row" style="margin-left: 0px;margin-right: 0px;">
+    <div class="col-md-12">
+        <div class="employeeinfopage">
+            
+            <div class="employeeinfo-content">
+                <SfTab @ref="HeaderTab">
+                    <TabAnimationSettings>
+                        <TabAnimationPrevious Effect="AnimationEffect.None"></TabAnimationPrevious>
+                        <TabAnimationNext Effect="AnimationEffect.None"></TabAnimationNext>
+                    </TabAnimationSettings>
+                    <TabItems>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text="Overview"></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <div class="overview-header">
+                                    <div class="profile-image">
+                                        @if (employee != null)
+                                        {
+                                            var employeeDetails = selectedEmployee == null ? employee : selectedEmployee;
+                                            <div class="circle-border">
+                                                @if (!string.IsNullOrEmpty(employeeDetails.ProfileImgPath))
+                                                {
+                                                    <img src="images/@employeeDetails.ProfileImgPath" alt="@employeeDetails.Name" class="employee-profile-img" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="profile-image">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="110" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path></svg>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    <div style="margin-left: 8rem; margin-top: -2rem;">
+                                        @if (employee != null)
+                                        {
+                                            var employeeDetails = selectedEmployee == null ? employee : selectedEmployee;
+                                            <h2 class="profile-data"><b>@employeeDetails.Name</b></h2>
+                                            <h5 class="profile-data">@employeeDetails.Mail</h5>
+                                            <h4 class="profile-data">@employeeDetails.Designation</h4>
+                                            <h4 class="profile-data">@employeeDetails.Branch</h4>
+                                            <h5 class="profile-data">Lead: @employeeDetails.TeamLead</h5>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="overview-content" style="margin-top: 10px;">
+                                    <SfTab CssClass="Fill Tab Header">
+                                        <TabAnimationSettings>
+                                            <TabAnimationPrevious Effect="AnimationEffect.None"></TabAnimationPrevious>
+                                            <TabAnimationNext Effect="AnimationEffect.None"></TabAnimationNext>
+                                        </TabAnimationSettings>
+                                        <TabItems>
+                                            <TabItem>
+                                                <ChildContent>
+                                                    <TabHeader Text="Official"></TabHeader>
+                                                </ChildContent>
+                                                <ContentTemplate>
+                                                    @if (employee != null)
+                                                    {
+                                                        var employeeDetails = selectedEmployee == null ? employee : selectedEmployee;
+                                                        <Official CurrentEmployee="@employeeDetails" />
+                                                    }
+                                                </ContentTemplate>
+                                            </TabItem>
+                                            <TabItem>
+                                                <ChildContent>
+                                                    <TabHeader Text="Personal"></TabHeader>
+                                                </ChildContent>
+                                                <ContentTemplate>
+                                                    @if (employee != null)
+                                                    {
+                                                        var employeeDetails = selectedEmployee == null ? employee : selectedEmployee;
+                                                        <Personal CurrentEmployee="@employeeDetails" />
+                                                    }
+                                                </ContentTemplate>
+                                            </TabItem>
+                                            @if (employee != null)
+                                            {
+                                                var employeeDetails = selectedEmployee == null ? employee : selectedEmployee.TeamLead == employee.Name ? selectedEmployee : null;
+                                                @if (employeeDetails != null)
+                                                {
+                                                    <TabItem>
+                                                        <ChildContent>
+                                                            <TabHeader Text="Leave Report"></TabHeader>
+                                                        </ChildContent>
+                                                        <ContentTemplate>
+                                                            <LeaveReport CurrentEmployee="@employeeDetails"></LeaveReport>
+                                                        </ContentTemplate>
+                                                    </TabItem>
+                                                }
+                                            }
+                                            @if (selectedEmployee == null)
+                                            {
+                                                @* <TabItem>
+                                                    <ChildContent>
+                                                        <TabHeader Text="Pay Stub"></TabHeader>
+                                                    </ChildContent>
+                                                    <ContentTemplate>
+                                                        <PayStub></PayStub>
+                                                    </ContentTemplate>
+                                                </TabItem> *@
+                                                <TabItem>
+                                                    <ChildContent>
+                                                        <TabHeader Text="Pay Roll"></TabHeader>
+                                                    </ChildContent>
+                                                    <ContentTemplate>
+                                                        <PayRoll></PayRoll>
+                                                    </ContentTemplate>
+                                                </TabItem>
+                                            }
+
+                                        </TabItems>
+                                    </SfTab>
+                                </div>
+                            </ContentTemplate>
+                        </TabItem>
+                        @if (selectedEmployee == null)
+                        {
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="My Team"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <div class="teamGridContainer">
+                                        <MyTeam CurrentEmployee="@employee" SelectedEmployee="@UpdateChoosenEmployeeProfile"></MyTeam>
+                                    </div>
+                                </ContentTemplate>
+                            </TabItem>
+                        }
+                    </TabItems>
+                </SfTab>
+            </div>
+        </div>
+    </div>
+</div>
+

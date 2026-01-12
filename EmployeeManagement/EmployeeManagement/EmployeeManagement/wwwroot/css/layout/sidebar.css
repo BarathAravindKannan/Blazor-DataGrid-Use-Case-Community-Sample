@@ -1,0 +1,167 @@
+/* ========================================
+   Sidebar Navigation & Offcanvas Layout
+   Responsive sidebar with desktop fixed and mobile offcanvas
+   ======================================== */
+
+/* Navigation Container - Flex Column */
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Navigation Items - Base */
+.nav-item {
+    font-size: var(--fs-sm);
+    padding: 0 !important;
+    list-style: none;
+}
+
+.nav-item:first-of-type {
+    padding-top: var(--spacing-lg);
+}
+
+.nav-item:last-of-type {
+    padding-bottom: var(--spacing-md);
+}
+
+/* Navigation Links - Desktop & Offcanvas */
+.nav-link {
+    color: var(--sidebar-text);
+    background: none;
+    border: none;
+    height: var(--sidebar-item-height);
+    display: flex;
+    align-items: center;
+    line-height: var(--lh-normal);
+    width: 100%;
+    padding: var(--sidebar-item-padding) var(--spacing-lg);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    cursor: pointer;
+    gap: var(--spacing-sm);
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-accent);
+}
+
+a.active {
+    background-color: var(--color-accent);
+    color: var(--sidebar-bg);
+    font-weight: var(--fw-semibold);
+}
+
+a.active:hover {
+    background-color: var(--color-accent-dark);
+}
+
+.nav-link:focus {
+    outline: 2px solid var(--color-accent);
+    color: white;
+    outline-offset: -2px;
+}
+
+/* Scrollable Container */
+.nav-scrollable {
+    background-color: var(--sidebar-bg);
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.nav-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.nav-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Syncfusion ListItem in Sidebar */
+#listSidebar .e-listview:not(.e-list-template) .e-list-item {
+    height: var(--sidebar-item-height);
+    padding: var(--sidebar-item-padding);
+}
+
+/* ========================================
+   Responsive Behavior
+   ======================================== */
+
+/* Mobile & Tablet (< 1024px) - Offcanvas Sidebar */
+@media (max-width: 1023px) {
+    /* Offcanvas from Bootstrap5 handles visibility */
+    .offcanvas {
+        --bs-offcanvas-width: min(100vw, var(--offcanvas-width));
+        --bs-offcanvas-bg: var(--offcanvas-bg);
+        box-shadow: var(--offcanvas-shadow);
+    }
+
+    .offcanvas-header {
+        background-color: var(--color-primary-light);
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .offcanvas-title {
+        color: var(--sidebar-text);
+        font-weight: var(--fw-bold);
+        font-size: var(--fs-lg);
+    }
+
+    .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+
+    .offcanvas-body {
+        padding: 0;
+        background-color: var(--sidebar-bg);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .offcanvas-body .nav-scrollable {
+        padding-left: 0;
+        padding-right: 0;
+        border-radius: 0;
+    }
+
+    /* Close offcanvas when link is clicked */
+    .offcanvas-body .nav-item ::deep .nav-link {
+        border-radius: 0;
+        margin: 0;
+    }
+    .sidebar-nav-btn 
+    {
+        background-color: inherit;
+        border: inherit;
+        padding: inherit;
+    }
+}
+
+/* Desktop (>= 1024px) - Fixed Sidebar */
+@media (min-width: 1024px) {
+    .nav-scrollable {
+        display: block !important;
+        height: calc(100vh - var(--navbar-height));
+        overflow-y: auto;
+        border-radius: 0;
+    }
+
+    /* No offcanvas on desktop */
+    .offcanvas {
+        display: none;
+    }
+}

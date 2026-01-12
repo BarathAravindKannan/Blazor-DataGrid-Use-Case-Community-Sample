@@ -1,0 +1,31 @@
+/* ========================================
+   Status Badge Utilities (Approved, Request, etc.)
+   ======================================== */
+
+.statustemp .statustxt {
+    position: relative;
+    top: 1.5px;
+}
+
+.statustemp.approved {
+    background-color: var(--bgcolor-status-approved);
+    color: var(--color-status-approved);
+}
+
+.statustemp.needtoapprove, .needtoapprove {
+    background-color: var(--bgcolor-status-need-approve);
+    color: var(--color-status-need-approve);
+}
+
+.statustemp {
+    position: relative;
+    height: 25px;
+    border-radius: 5px;
+    text-align: center;
+    width: 120px;
+    color: var(--color-bg);
+}
+
+.leavetype {
+    border-radius: 20px;
+}

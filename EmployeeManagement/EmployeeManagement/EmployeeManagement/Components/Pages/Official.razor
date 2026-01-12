@@ -1,0 +1,83 @@
+﻿@using EmployeeManagement.Components.Pages
+@using static EmployeeManagement.Components.Pages.Home
+
+<div class="tab-content">
+    <div class="detail">
+        <span class="sub-heading">Employee ID</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.EmployeeCode</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Team</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.Team</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Reporting person</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.TeamLead</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Manager Name</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.ManagerName</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Mail ID</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.Mail</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Designation</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.Designation</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Confirmed</span>
+        <span class="gap">:</span>
+        <span class="information">Yes</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Office Location</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.Branch</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Date Joined</span>
+        <span class="gap">:</span>
+        <span class="information">
+            @CurrentEmployee.DateOfJoining.ToString("MMM dd, yyyy")
+        </span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Experience</span>
+        <span class="gap">:</span>
+        <span class="information">@(DateTime.Now.Year - CurrentEmployee.DateOfJoining.Year) years</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">User Work Shift</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.WorkShift</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">WFH</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.WFH</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Employment Type</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.EmploymentType</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Company Benefits</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.CompanyBenefits</span>
+    </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public EmployeesDetails CurrentEmployee { get; set; }
+}

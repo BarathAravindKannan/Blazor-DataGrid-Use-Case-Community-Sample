@@ -1,0 +1,110 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <!-- Navbar with Hamburger Button -->
+    <div class="top-row navbar navbar-expand navbar-dark">
+        <!-- Hamburger Button (Mobile & Tablet) -->
+        <button class="navbar-toggler" id="navMenuToggle" type="button" 
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" 
+                aria-controls="offcanvasSidebar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Brand / Logo -->
+        <span class="navbar-brand ms-3">NexGen7 Software</span>
+
+        <!-- Navbar content (right-aligned on desktop) -->
+        <div class="ms-auto">
+            <!-- User profile or other navbar items go here -->
+        </div>
+    </div>
+
+    <!-- Sidebar - Desktop (Visible on lg and up) -->
+    <aside class="sidebar d-none d-lg-block">
+        <div class="nav-scrollable">
+            <nav class="flex-column">
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        My Profile
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="organization">
+                        Organization
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="policies">
+                        Policies
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="achievements">
+                        Achievements
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="announcements">
+                        Announcements
+                    </NavLink>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Offcanvas Sidebar - Mobile & Tablet (Hidden on lg and up) -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar" 
+         aria-labelledby="offcanvasSidebarLabel" data-bs-scroll="false">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <nav class="flex-column w-100">
+                <button class="sidebar-nav-btn" data-bs-dismiss="offcanvas">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                            My Profile
+                        </NavLink>
+                    </div>
+                </button>
+                <button class="sidebar-nav-btn" data-bs-dismiss="offcanvas">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="organization">
+                            Organization
+                        </NavLink>
+                    </div>
+                </button>
+                <button class="sidebar-nav-btn" data-bs-dismiss="offcanvas">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="policies">
+                            Policies
+                        </NavLink>
+                    </div>
+                </button>
+                <button class="sidebar-nav-btn" data-bs-dismiss="offcanvas">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="achievements">
+                            Achievements
+                        </NavLink>
+                    </div>
+                </button>
+                <button class="sidebar-nav-btn" data-bs-dismiss="offcanvas">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="announcements">
+                            Announcements
+                        </NavLink>
+                    </div>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content flex-grow-1 overflow-y-auto">
+        <article>
+            @Body
+        </article>
+    </main>
+</div>
+

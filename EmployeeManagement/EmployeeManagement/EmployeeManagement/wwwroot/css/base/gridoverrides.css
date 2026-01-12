@@ -1,0 +1,19 @@
+﻿/* ========================================
+   Base Reset & Global HTML/Body Styles
+   ======================================== */
+
+.e-summarycell, .e-headercell, .e-rowcell, .e-toolbar-item {
+    background-color: #fbf9f6 !important;
+}
+
+.e-summarycell {
+    background-color: #fff4e5 !important;
+}
+@media(max-width: 792px){
+    .e-tbar-btn-text{
+        display:none;
+    }
+}
+#leave_grid_excelexport .e-tbar-btn-text {
+    display: none;
+}

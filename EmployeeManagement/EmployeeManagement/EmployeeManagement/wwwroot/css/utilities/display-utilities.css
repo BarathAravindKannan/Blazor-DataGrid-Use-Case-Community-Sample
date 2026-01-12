@@ -1,0 +1,26 @@
+/* ========================================
+   Display & Layout Utilities
+   ======================================== */
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.policiespage .row,
+.achievementspage .row,
+.announcementpage .row {
+    padding: 0 0 10px 0;
+}
+
+.approve-icon {
+    padding-top: 5px;
+}
+
+hr {
+    margin: 0;
+    /* TODO: Define --color-sf-border-light in _variables.css 
+       Currently using fallback color from borders */
+    /* border: 1px solid var(--color-sf-border-light); */
+    border: 1px solid #e0e0e0;
+}

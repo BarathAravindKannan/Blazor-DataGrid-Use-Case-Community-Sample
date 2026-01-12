@@ -1,0 +1,13 @@
+/* ========================================
+   Base Reset & Global HTML/Body Styles
+   ======================================== */
+
+html, body {
+    font-family: var(--font-family-base);
+    background-color: #fbf9f6;
+}
+
+a, .btn-link {
+    color: #006bb7;
+}
+

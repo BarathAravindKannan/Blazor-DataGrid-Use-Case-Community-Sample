@@ -1,0 +1,148 @@
+/* ========================================
+   Design Tokens & CSS Custom Properties
+   ======================================== */
+
+:root {
+    /* ========== COLOR PALETTE ========== */
+    /* Primary Brand Colors */
+    /*--color-primary: #2d323e; //old color */
+    --color-primary: #1E1E2C;
+    --color-sf-primary: var(--color-orange-red);
+    --color-sf-primary-bg-color: var(--color-orange-red);
+    --color-sf-primary-bg-color-hover: var(--color-orange-red);
+    --color-sf-primary-border-color: var(--color-orange-red);
+    --color-sf-primary-border-color-hover: var(--color-orange-red);
+    --color-primary-light: #3d4354;
+    --color-primary-lighter: #4d5464;
+    /* Accent Colors */
+    /*--color-accent: #eaddff;*/
+    --color-accent: #F26F67;
+    --color-accent-dark: #F26F67;
+    /* Semantic Colors */
+    --color-success: #4caf50;
+    --color-warning: #ff9800;
+    --color-error: #e60000;
+    --color-info: #2196f3;
+    /* Status Badge Colors */
+    --bgcolor-status-approved: #c9ff99;
+    --color-status-approved: #3e6521;
+    --color-status-closed: #ccffcc;
+    --bgcolor-status-need-approve: #ffd7cc;
+    --color-status-need-approve: #e60000;
+    /* Leave Badge Colors */
+    --bgcolor-badge-casual: #65cea7;
+    --bgcolor-badge-sick: #23c6c8;
+    --bgcolor-badge-earned: #5c8a8a;
+    --bgcolor-badge-request: #f3ce85;
+    /* Neutral Colors */
+    --color-text: rgba(0, 0, 0, 0.87);
+    --color-text-light: rgba(0, 0, 0, 0.6);
+    --color-text-lighter: rgba(0, 0, 0, 0.4);
+    --color-border: #e0e0e0;
+    --color-bg: #fbf9f6;
+    --color-bg-light: #f5f5f5;
+    --color-light-green: #34b1aa5c;
+    --color-orange-red: #F26F67;
+    --color-light-green: #34b1aa5c;
+    /* Syncfusion UI Colors 
+     TODO: Define these based on Syncfusion theme used
+     Currently using placeholder values */
+    /* --color-sf-border-light: #e0e0e0; */
+    /* ========== SPACING SCALE ========== */
+    --spacing-unit: 0.5rem;
+    --spacing-xs: calc(var(--spacing-unit) * 0.5); /* 0.25rem */
+    --spacing-sm: calc(var(--spacing-unit) * 1); /* 0.5rem */
+    --spacing-md: calc(var(--spacing-unit) * 2); /* 1rem */
+    --spacing-lg: calc(var(--spacing-unit) * 3); /* 1.5rem */
+    --spacing-xl: calc(var(--spacing-unit) * 4); /* 2rem */
+    --spacing-2xl: calc(var(--spacing-unit) * 6); /* 3rem */
+    /* ========== TYPOGRAPHY ========== */
+    /* Font Families */
+    --font-family-base: 'Roboto', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    --font-family-alt: 'GeezaPro', 'DejaVu Serif', 'sans-serif', '-apple-system', 'BlinkMacSystemFont';
+    --font-family-mono: 'Monaco', 'Courier New', monospace;
+    /* Font Sizes */
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-base: 1rem;
+    --fs-lg: 1.125rem;
+    --fs-xl: 1.25rem;
+    --fs-2xl: 1.5rem;
+    /* Line Heights */
+    --lh-tight: 1.2;
+    --lh-normal: 1.5;
+    --lh-relaxed: 1.75;
+    --lh-custom-header: 20px;
+    /* Font Weights */
+    --fw-light: 300;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    /* ========== LAYOUT & STRUCTURE ========== */
+    /* Breakpoints */
+    --breakpoint-xs: 320px;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    /* Sidebar - Desktop */
+    --sidebar-width: 250px;
+    --sidebar-width-collapsed: 60px;
+    --sidebar-bg: var(--color-primary);
+    --sidebar-text: white;
+    --sidebar-item-height: 60px;
+    --sidebar-item-padding: 12px;
+    /* Sidebar - Mobile Specific */
+    --sidebar-width-mobile: 100vw;
+    --sidebar-max-width: 280px;
+    --sidebar-padding-mobile: var(--spacing-md);
+    --sidebar-padding-desktop: 0;
+    /* Navbar - Desktop */
+    --navbar-height: 3.5rem;
+    --navbar-bg: var(--color-primary);
+    --navbar-text: white;
+    --navbar-padding-desktop: 2rem 1.5rem;
+    /* Navbar - Mobile Specific */
+    --navbar-padding-mobile: var(--spacing-md);
+    --navbar-height-mobile: 3.5rem;
+    /* Hamburger Button */
+    --hamburger-width: 48px;
+    --hamburger-height: 48px;
+    --hamburger-size: 1.75rem;
+    /* Main Content - Mobile Specific */
+    --main-content-padding-mobile: var(--spacing-md) var(--spacing-sm);
+    --main-content-padding-tablet: 1.5rem 1rem;
+    --main-content-padding-desktop: 2rem 1.5rem;
+    /* Layout - Desktop */
+    --layout-sidebar-column: 250px;
+    --layout-content-column: 1fr;
+    /* Offcanvas Drawer (Mobile) */
+    --offcanvas-width: 280px;
+    --offcanvas-bg: var(--sidebar-bg);
+    --offcanvas-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    /* Cards & Components */
+    --card-border-radius: 5px;
+    --card-shadow: 0 6px 6px rgba(0, 0, 0, 0.07);
+    /* Buttons */
+    --btn-height: 2.5rem;
+    --btn-height-sm: 2rem;
+    --btn-height-lg: 3rem;
+    --btn-padding: var(--spacing-md);
+    --btn-padding-sm: var(--spacing-sm);
+    /* Grid & Touch */
+    --row-height-mobile: 50px;
+    --row-height-desktop: 40px;
+    --touch-target: 44px;
+    /* Header Heights */
+    --header-height: 40px;
+    /* ========== EFFECTS & TRANSITIONS ========== */
+
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 300ms ease-in-out;
+    --transition-slow: 500ms ease-in-out;
+    /* ========== BORDERS & OUTLINES ========== */
+
+    --border-width: 1px;
+    --border-radius: 4px;
+}

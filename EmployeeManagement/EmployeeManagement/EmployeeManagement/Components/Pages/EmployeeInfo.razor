@@ -1,0 +1,112 @@
+﻿@page "/empInfo/{EmployeeCode}"
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor
+@using static EmployeeManagement.Components.Pages.Home
+
+<br >
+<br >
+<br >
+
+@if (CurrentEmployee != null)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="employeeinfopage">
+                
+                <div class="employeeinfo-content">
+                    <SfTab CssClass="Fill Tab Header">
+                        <TabItems>
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Overview"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <div class="overview-header">
+                                        <div class="profile-image">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path></svg>
+                                        </div>
+                                        <div>
+                                            @if (CurrentEmployee != null)
+                                            {
+                                                <div class="profile-data"><b>@CurrentEmployee.Name</b></div>
+
+                                               
+                                                <div class="profile-data">@CurrentEmployee.Designation</div>
+                                                <div class="profile-data">@CurrentEmployee.Branch</div>
+                                                <div class="profile-data">@CurrentEmployee.TeamLead</div>
+
+                                                
+                                                @* <span class="information">@CurrentEmployee.EmploymentType</span> *@
+                                            }
+
+                                        </div>
+                                    </div>
+                                    <SfTab CssClass="Fill Tab Header">
+                                        <TabItems>
+                                            <TabItem>
+                                                <ChildContent>
+                                                    <TabHeader Text="Official"></TabHeader>
+                                                </ChildContent>
+                                                <ContentTemplate>
+                                                    @if (CurrentEmployee != null)
+                                                    {
+                                                        <Official CurrentEmployee="@CurrentEmployee" />
+                                                    }
+                                                </ContentTemplate>
+                                            </TabItem>
+                                            <TabItem>
+                                                <ChildContent>
+                                                    <TabHeader Text="Personal"></TabHeader>
+                                                </ChildContent>
+                                                <ContentTemplate>
+                                                    @if (CurrentEmployee != null)
+                                                    {
+                                                        <Personal CurrentEmployee="@CurrentEmployee" />
+                                                    }
+                                                </ContentTemplate>
+                                            </TabItem>
+                                            <TabItem>
+                                                <ChildContent>
+                                                    <TabHeader Text="Leave Report"></TabHeader>
+                                                </ChildContent>
+                                                <ContentTemplate>
+                                                    <LeaveReport></LeaveReport>
+                                                </ContentTemplate>
+                                            </TabItem>
+                                        </TabItems>
+                                    </SfTab>
+                                </ContentTemplate>
+                            </TabItem>
+                        </TabItems>
+                    </SfTab>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@code
+{
+    [Parameter]
+    public EmployeesDetails CurrentEmployee { get; set; }
+
+    public string EmployeeCode { get; set; }
+
+    // protected override bool ShouldRender()
+    // {
+    //     CurrentEmployee = EmployeesDetails.GetAllEmployeeRecords().Where(employee => employee.EmployeeCode == EmployeeCode).FirstOrDefault();
+    //     return true;
+    // }
+
+    protected override void OnInitialized()
+    {
+        if (CurrentEmployee == null && EmployeeCode != null)
+        {
+            CurrentEmployee = EmployeesDetails.GetAllEmployeeRecords().Where(employee => employee.EmployeeCode == EmployeeCode).FirstOrDefault();
+        }
+    }
+
+}

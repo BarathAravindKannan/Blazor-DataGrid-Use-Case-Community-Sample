@@ -1,0 +1,149 @@
+﻿@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Popups
+@inject NavigationManager NavigationManager
+@using static EmployeeManagement.Components.Pages.Home
+@using System;
+
+<SfGrid AllowGrouping=true ShowColumnChooser=true AllowPaging=true AllowFiltering=true DataSource="EmployeesDetails.GetAllEmployeeRecords()"
+        Toolbar="@(new List<string>() {"ExcelExport" ,"ColumnChooser", "Search" })" Query="@QueryData" Width="100%" Height="400" RowHeight="50" AllowExcelExport=true @ref="Grid">
+    <GridPageSettings PageSize="10"></GridPageSettings>
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+    <GridEvents OnRecordClick="RecordClickHandler" OnToolbarClick="ToolbarClickHandler" TValue="EmployeesDetails"></GridEvents>
+
+    <GridColumns>
+        <GridColumn HeaderText="Image" Width="80" AllowFiltering=false AllowSorting=false AllowGrouping=false TextAlign="TextAlign.Center">
+            <Template>
+                @{
+                    var employee = (context as EmployeesDetails);
+                    if(!string.IsNullOrEmpty(employee.ProfileImgPath))
+                    {
+                        <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border"/>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 15" color="rgba(0, 0, 0, .54)">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                            <path fillRule="evenodd"
+                                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                        </svg>
+                    }
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.EmployeeCode) HeaderText="ID" Width="120">
+            <Template>
+                @{
+                    var employee = (context as EmployeesDetails);
+                   
+                    <SfTooltip ID="content" CssClass="e-tooltip-template-css">
+                        <ContentTemplate>
+                            <div id="democontent" class="democontent">
+                                <div style="display: flex; padding: 4px 4px 0 4px">
+                                    @if(!string.IsNullOrEmpty(employee.ProfileImgPath))
+                                    {
+                                        <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border" />
+                                    }
+                                    else
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path>
+                                            <path fillrule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path>
+                                        </svg>
+                                    }
+                                    <div style="padding: 0 0 0 10px">
+                                        <div>@employee.Name</div>
+                                        <div>@employee.Designation</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                        <ChildContent>
+                            <a class="empid employee-popover" href="#">
+                                @employee.EmployeeCode
+                            </a>
+                        </ChildContent>
+                    </SfTooltip>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.Name) HeaderText="Name" Width="150">
+            <Template>
+                @{
+                    var employee = (context as EmployeesDetails);
+
+                    <SfTooltip ID="content" CssClass="e-tooltip-template-css">
+                        <ContentTemplate>
+                            <div id="democontent" class="democontent" >
+	                            <div style="display: flex; padding: 4px 4px 0 4px">
+                                    @if (!string.IsNullOrEmpty(employee.ProfileImgPath))
+                                    {
+                                        <img src="images/@employee.ProfileImgPath" width="32" height="32" class="circle-border" />
+                                    }
+                                    else
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16" color="rgba(0, 0, 0, .54)">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"></path>
+                                            <path fillrule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"></path>
+                                        </svg>
+                                    }
+		                            <div style="padding: 0 0 0 10px">
+                                        <div>@employee.Name</div>
+                                        <div>@employee.Designation</div>
+		                            </div>
+	                            </div>
+                            </div>
+                        </ContentTemplate>
+                        <ChildContent>
+                        <span class="emp-name">@employee.Name</span>
+                        </ChildContent>
+                    </SfTooltip>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.Mail) HeaderText="Mail" Width="260" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.Designation) HeaderText="Designation" ClipMode="ClipMode.EllipsisWithTooltip" Width="260"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.DateOfJoining) HeaderText="Date Of Joining" Type="ColumnType.DateOnly" Format="MMM dd,yyyy" TextAlign="TextAlign.Right" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.Branch) HeaderText="Branch" ClipMode="ClipMode.EllipsisWithTooltip" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.Team) HeaderText="Team(s)" ClipMode="ClipMode.EllipsisWithTooltip" Width="220"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.TeamLead) HeaderText="Reporter" Width="150" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+        <GridColumn Field=@nameof(EmployeesDetails.ManagerName) HeaderText="Manager" ClipMode="ClipMode.EllipsisWithTooltip" Width="150"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code
+{
+    [Parameter]
+    public EmployeesDetails CurrentEmployee { get; set; }
+
+    private bool ShowSelectedEmployeeInfo { get; set; } = false;
+
+    private SfGrid<EmployeesDetails> Grid;
+
+    [Parameter]
+    public EventCallback<EmployeesDetails> SelectedEmployee { get; set; }
+
+    private Query QueryData = new Query();
+
+    protected override void OnInitialized()
+    {
+        QueryData = new Query().Where("TeamLead", "equal", CurrentEmployee.Name);
+    }
+
+    private void RecordClickHandler(Syncfusion.Blazor.Grids.RecordClickEventArgs<EmployeesDetails> args)
+    {
+        if (args.Column.Field == "EmployeeCode")
+        {
+            SelectedEmployee.InvokeAsync(args.RowData);
+
+        }
+    }
+
+    private async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id.Contains("excelexport", StringComparison.OrdinalIgnoreCase))
+        {
+            await Grid.ExportToExcelAsync();
+        }
+    }
+}

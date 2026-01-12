@@ -1,0 +1,27 @@
+/* ========================================
+   Tab Components & Content (Syncfusion)
+   ======================================== */
+
+.tab-content {
+    padding: 20px 10px 20px 10px;
+    width: 100%;
+}
+
+.e-tab .e-content > .e-item.e-active {
+    margin-top: 15px;
+}
+.e-tab .e-tab-header .e-toolbar-item.e-active .e-text-wrap::before {
+    border: 1.6px solid var(--color-primary) !important;
+} 
+.e-tab .e-tab-header .e-toolbar-item.e-active.e-ileft .e-tab-text, .e-tab .e-tab-header .e-toolbar-item.e-active.e-iright .e-tab-text {
+    color: var(--color-primary) !important;
+}
+.teamGridContainer {
+    width: 80vw;
+}
+
+@media(max-width: 993px) {
+    .teamGridContainer {
+        width: 95vw;
+    }
+}

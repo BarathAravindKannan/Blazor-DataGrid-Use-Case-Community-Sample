@@ -1,0 +1,53 @@
+﻿@using EmployeeManagement.Components.Pages
+@using static EmployeeManagement.Components.Pages.Home
+
+
+<div class="tab-content">
+    <div class="detail">
+        <span class="sub-heading">First Name</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.FirstName</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Last Name</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.LastName</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Date of Birth</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.DOB.ToString("MMM dd, yyyy")</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Gender</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.Gender</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Father's Name</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.FatherName</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Mother's Name</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.MotherName</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Blood Group</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.BloodGroup</span>
+    </div>
+    <div class="detail">
+        <span class="sub-heading">Marital Status</span>
+        <span class="gap">:</span>
+        <span class="information">@CurrentEmployee.MaritalStatus</span>
+    </div>
+</div>
+
+
+@code
+{
+    [Parameter]
+    public EmployeesDetails CurrentEmployee { get; set; }
+}

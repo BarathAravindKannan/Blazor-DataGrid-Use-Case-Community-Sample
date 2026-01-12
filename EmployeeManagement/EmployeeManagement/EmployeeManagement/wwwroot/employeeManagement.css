@@ -1,0 +1,241 @@
+﻿.nav > li > a:focus,
+.nav > li > a.active,
+.nav > li > a:hover {
+    text-decoration: none;
+    background-color: #eaddff;
+}
+
+.policiespage a:focus,
+.policiespage a.active,
+.policiespage a:hover {
+    text-decoration: none;
+}
+
+.employeeinfopage .overview-header {
+    padding: 20px;
+    border-bottom: 1px solid rgb(0, 0, 0, 0.2);
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.07);
+}
+
+
+/*removes the underline from on the link in the organisationpage*/
+a.employee-popover:hover, a.employee-popover{
+    text-decoration: none !important;
+    font-size: 14px;
+}
+
+.tab-content {
+    padding: 20px 10px 20px 10px;
+    width: 100%;
+}
+
+/* Tooltip */
+
+.e-tooltip-template-css.e-tooltip-wrap.e-popup {
+    background-color: #eaddff !important;
+    border: 1px solid #e0e0e0;
+}
+
+.e-tooltip-template-css.e-tooltip-wrap .e-arrow-tip-outer.e-tip-bottom {
+    border-top: 8px solid #e0e0e0;
+}
+
+.e-tooltip-template-css.e-tooltip-wrap .e-tip-content {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.e-tooltip-template-css.e-tooltip-wrap {
+    opacity: 1;
+}
+
+.e-tooltip-template-css.e-tooltip-wrap .e-arrow-tip-inner.e-tip-bottom,
+.e-tooltip-template-css.e-tooltip-wrap .e-arrow-tip-inner.e-tip-top {
+    color: #eaddff;
+}
+
+/* Employee Pay Stub and PayRoll */
+
+.paystub-header,
+.payroll-header {
+    font-size: 13px;
+    font-family: 'Roboto', 'Segoe UI', 'GeezaPro', 'DejaVu Serif', 'sans-serif', '-apple-system', 'BlinkMacSystemFont';
+    line-height: 20px;
+    padding: 0 0 20px 0;
+}
+
+.paystubinfo,
+.payrollinfo {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+@media (min-width: 600px) {
+    .paystubdd-container,
+    .payrolldd-container {
+        float: right;
+    }
+
+    .paystubinfo,
+    .payrollinfo {
+        padding-top: 8px;
+        display: inline-block;
+    }
+}
+
+.approve-icon {
+    padding-top: 5px;
+}
+
+/* Employee Info */
+.employeeinfo-header {
+    padding: 0 0 20px 0;
+}
+
+.profile-image {
+    width: 120px;
+    float: left;
+}
+
+.profile-data {
+    padding: 2px 0;
+}
+
+.employeeLeave-header {
+    font-size: 13px;
+    font-family: 'Roboto', 'Segoe UI', 'GeezaPro', 'DejaVu Serif', 'sans-serif', '-apple-system', 'BlinkMacSystemFont';
+    line-height: 20px;
+    padding: 0 0 20px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.daterange .e-input-group .e-clear-icon,
+.daterange .e-input-group.e-control-wrapper .e-clear-icon {
+    display: none;
+}
+
+.badge-casual {
+    background-color: #65cea7;
+    color: #fff;
+}
+
+.badge-sick {
+    background-color: #23c6c8;
+    color: #fff;
+}
+
+.badge-others {
+    background-color: #5c8a8a;
+    color: #fff;
+}
+
+.badge-request {
+    background-color: #f3ce85;
+    color: #fff;
+}
+
+td.cardcell {
+    padding: 4px 0;
+}
+
+    td.cardcell.separateline {
+        padding-bottom: 20px;
+    }
+
+.detail {
+    padding-bottom: 15px;
+}
+
+.sub-heading {
+    font-weight: 400;
+    padding-right: 58px;
+    width: 205px;
+    display: inline-block;
+    color: #757575;
+}
+
+.information {
+    padding-left: 15px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+#listSidebar .e-listview:not(.e-list-template) .e-list-item {
+    height: 60px;
+    padding: 12px;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.policiespage .row,
+.achievementspage .row,
+.announcementpage .row {
+    padding: 0 0 10px 0;
+}
+
+.announcementpage .e-card-content {
+    height: 175px;
+    max-width: 600px;
+    overflow: auto;
+
+}
+
+.achievementspage .e-card-content {
+    height: 115px;
+    max-width: 600px;
+    overflow: auto;
+}
+
+.policiespage .e-card-content {
+    height: 250px;
+    overflow: auto;
+}
+
+@media (min-width: 870px) {
+    .card-control-section.basic_card_layout 
+    .col-xs-6.col-sm-6.col-lg-6.col-md-6 {
+        width: 50%;
+    }
+
+    .achievements-content
+    .card-control-section.basic_card_layout
+    .col-xs-6.col-sm-6.col-lg-6.col-md-6 {
+        width: 50%;
+    }
+
+    .card-control-section.basic_card_layout .card-layout {
+            margin: 0;
+            padding: 10px 0 10px 0;
+    }
+}
+
+.e-card .e-card-actions .e-card-btn, .e-card .e-card-actions a {
+
+    border: 1px solid thin !important;
+}
+
+/*draws the horizontal line between the header footer content*/
+hr {
+    margin: 0;
+    border: 1px solid var(--color-sf-border-light)
+}
+
+/*bold the header content for */
+.e-card .e-card-header .e-card-header-caption .e-card-header-title
+{
+    font-weight: bold !important;
+}
+
+/*font size for employee name in the organisation table*/
+.emp-name{
+    font-size: 14px;
+}
+
+/*gives space at the top in the My team tab*/
+.e-tab .e-content > .e-item.e-active
+{
+    margin-top: 25px;
+}
+

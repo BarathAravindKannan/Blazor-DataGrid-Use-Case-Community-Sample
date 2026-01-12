@@ -1,0 +1,107 @@
+/* ========================================
+   Card Section Content (Info, Details, Profile)
+   ======================================== */
+
+.profile-image {
+    width: 8rem;
+    float:left;
+}
+
+.employee-profile-img {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    border: 0;
+}
+.circle-border{
+    border-radius: 50%;
+}
+.profile-data {
+    padding: 2px 0;
+}
+h2.profile-data{
+    font-size: 1.25rem;
+    font-weight: 100;
+}
+h5.profile-data{
+    font-size: 0.75rem;
+    font-weight: 300;
+}
+h4.profile-data{
+    font-size: 0.75rem;
+    font-weight: 200;
+}
+
+.paystubinfo,
+.payrollinfo {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.leaveinfo {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.detail {
+    padding-bottom: 15px;
+}
+
+.sub-heading {
+    font-weight: 400;
+    padding-right: 58px;
+    width: 205px;
+    display: inline-block;
+    color: #757575;
+}
+@media(max-width:992px)
+{
+    .sub-heading{
+        width: 140px;
+    }
+}
+
+.information {
+    padding-left: 15px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+td.cardcell {
+    padding: 4px 0;
+}
+
+td.cardcell.separateline {
+    padding-bottom: 20px;
+}
+
+@media (min-width: 600px) {
+    .paystubdd-container,
+    .payrolldd-container {
+        float: right;
+    }
+
+    .paystubinfo,
+    .payrollinfo {
+        padding-top: 8px;
+        display: inline-block;
+    }
+}
+
+@media (min-width: 600px) {
+    .daterange {
+        float: right;
+    }
+
+    .leaveinfo {
+        padding-top: 8px;
+        display: inline-block;
+    }
+}
+
+.leaveinfo-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.daterange .e-input-group .e-clear-icon,
+.daterange .e-input-group.e-control-wrapper .e-clear-icon {
+    display: none;
+}

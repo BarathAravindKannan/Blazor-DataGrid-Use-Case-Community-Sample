@@ -1,0 +1,255 @@
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using static EmployeeManagement.Components.Pages.Home
+
+<div class="paystubpage tab-content">
+    <div class="paystub-header">
+        <div class="paystubinfo">
+            Paystub for the selected month in @currentYear
+        </div>
+        <div class="paystubdd-container">
+            <SfDropDownList ID="paystubdd" DataSource="@months" Value="@(months[currentMonth].HeaderText)" ValueChanged="MonthChangeHandler" TValue="String" TItem="Year" Width="250px">
+             <DropDownListFieldSettings Text="HeaderText" Value="HeaderText"></DropDownListFieldSettings>
+          </SfDropDownList>
+        </div>
+    </div>
+    <SfGrid ID="paystub_grid" Query="@getQuery" AllowSelection=false EnableHover=false DataSource="EmployeesPaySlipDetails.GetAllPaySlipRecords()" Width="100%">
+        <GridColumns>
+            <GridColumn Field="@nameof(EmployeesPaySlipDetails.EmployeeCode)" HeaderText="Code" Visible=false Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesPaySlipDetails.Name)" HeaderText="Item" Width="170">
+                <Template>
+                    <div>
+                        <table class="CardTable">
+                            <colgroup>
+                                <col />
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <td class="cardcell"> Regular Hours Worked </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell">OverTime Hours Worked </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell"> Bonus </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell separateline"> Commission </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell"> Federal Income Tax </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell"> State Income Tax </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell"> Social Security Tax </td>
+                                </tr>
+                                <tr>
+                                    <td class="cardcell"> MedicareTax </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@months[currentMonth].Field" HeaderText="@(months[currentMonth].HeaderText)">
+                <Template>
+                    @{
+                        var stub = choosenEmployee?.GetType().GetProperty(months[currentMonth].Field).GetValue(choosenEmployee) as MonthPayStub;
+                        if (stub == null)
+                        {
+                            <div>
+                                <table class="CardTable">
+                                    <colgroup>
+                                        <col />
+                                    </colgroup>
+                                    <tbody>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell separateline">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                        <tr><td class="cardcell">-</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            var regularHoursworked = stub.RegularHoursWorked;
+                            var overTimeHoursWorked = stub.OverTimeHoursWorked;
+                            var bonus = stub.Bonus;
+                            var commission = stub.Commission;
+                            var federalIncomeTax = stub.FederalIncomeTax;
+                            var stateIncomeTax = stub.StateIncomeTax;
+                            var socialSecurityTax = stub.SocialSecurityTax;
+                            var medicareTax = stub.MedicareTax;
+                            
+                            <div>
+                                <table class="CardTable">
+                                    <colgroup>
+                                        <col />
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @regularHoursworked
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @overTimeHoursWorked
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @bonus
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell separateline">
+                                                $ @commission
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @federalIncomeTax
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @stateIncomeTax
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @socialSecurityTax
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cardcell">
+                                                $ @medicareTax
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+        <GridAggregates>
+            <GridAggregate>
+                <GridAggregateColumns>
+                    <GridAggregateColumn Field="@nameof(EmployeesPaySlipDetails.Name)" Type="AggregateType.Custom">
+                        <FooterTemplate>
+                            <span>Gross Pay</span>
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                    <GridAggregateColumn Field="@months[currentMonth].Field" Type="AggregateType.Custom" Format="C2">
+                        <FooterTemplate>
+                            $ @CalculateGrossAggregate(choosenEmployee.GetType().GetProperty(months[currentMonth].Field).GetValue(choosenEmployee) as MonthPayStub)
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                </GridAggregateColumns>
+            </GridAggregate>
+            <GridAggregate>
+                <GridAggregateColumns>
+                    <GridAggregateColumn Field="@nameof(EmployeesPaySlipDetails.Name)" Type="AggregateType.Custom">
+                        <FooterTemplate>
+                            <span>Deductions</span>
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                    <GridAggregateColumn Field="@months[currentMonth].Field" Type="AggregateType.Custom" Format="C2">
+                        <FooterTemplate>
+                            $ @CalculateDeductions(choosenEmployee.GetType().GetProperty(months[currentMonth].Field).GetValue(choosenEmployee) as MonthPayStub)
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                </GridAggregateColumns>
+            </GridAggregate>
+            <GridAggregate>
+                <GridAggregateColumns>
+                    <GridAggregateColumn Field="@nameof(EmployeesPaySlipDetails.Name)" Type="AggregateType.Custom">
+                        <FooterTemplate>
+                            <span>Net Pay</span>
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                    <GridAggregateColumn Field="@months[currentMonth].Field" Type="AggregateType.Custom" Format="C2">
+                        <FooterTemplate>
+                            $ @CalculateNetPay(choosenEmployee.GetType().GetProperty(months[currentMonth].Field).GetValue(choosenEmployee) as MonthPayStub)
+                        </FooterTemplate>
+                    </GridAggregateColumn>
+                </GridAggregateColumns>
+            </GridAggregate>
+        </GridAggregates>
+    </SfGrid>
+</div>
+
+@code
+{
+    private string currentYear = DateTime.Now.Year.ToString();
+    private int currentMonth = DateTime.Now.Month - 1;
+
+    private Query getQuery = new Query();
+    private EmployeesPaySlipDetails choosenEmployee { get; set; } = null;
+
+    private double CalculateGrossAggregate(MonthPayStub employee)
+    {
+        if (employee == null) return 0;
+        return employee.RegularHoursWorked + employee.OverTimeHoursWorked + employee.Bonus + employee.Commission;
+    }
+
+
+    private double CalculateDeductions(MonthPayStub employee)
+    {
+        if (employee == null) return 0;
+        return Math.Round(employee.FederalIncomeTax + employee.StateIncomeTax + employee.SocialSecurityTax + employee.MedicareTax, 2);
+    }
+
+
+    private double CalculateNetPay(MonthPayStub employee)
+    {
+        if (employee == null) return 0;
+        return Math.Round(CalculateGrossAggregate(employee) - CalculateDeductions(employee));
+    }
+
+
+    protected override void OnInitialized()
+    {
+        getQuery = new Query().Where("EmployeeCode", "equal", "EMP100001");
+        choosenEmployee = EmployeesPaySlipDetails.GetAllPaySlipRecords().Where(record => record.EmployeeCode.Equals("EMP100001")).FirstOrDefault();
+    }
+
+    private void MonthChangeHandler(object args)
+    {
+        currentMonth = months.FindIndex(ef => ef.HeaderText == args.ToString());
+    }
+
+    private class Year
+    {
+        public string Field { get; set; }
+        public string HeaderText { get; set; }
+    }
+
+    List<Year> months = new List<Year>()
+    {
+        new Year(){ Field = "JanPayStub", HeaderText = "January" },
+        new Year(){ Field = "FebPayStub", HeaderText = "Febraury" },
+        new Year(){ Field = "MarPayStub", HeaderText = "March" },
+        new Year(){ Field = "AprPayStub", HeaderText = "April" },
+        new Year(){ Field = "MayPayStub", HeaderText = "May" },
+        new Year(){ Field = "JunPayStub", HeaderText = "June" },
+        new Year(){ Field = "JulPayStub", HeaderText = "July" },
+        new Year(){ Field = "AugPayStub", HeaderText = "August" },
+        new Year(){ Field = "SepPayStub", HeaderText = "September" },
+        new Year(){ Field = "OctPayStub", HeaderText = "October" },
+        new Year(){ Field = "NovPayStub", HeaderText = "November" },
+        new Year(){ Field = "DecPayStub", HeaderText = "December" }
+    };
+
+}

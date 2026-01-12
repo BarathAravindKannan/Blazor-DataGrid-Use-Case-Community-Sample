@@ -1,0 +1,235 @@
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@using static EmployeeManagement.Components.Pages.Home
+
+<div class="tab-content">
+    <div class="employeeLeave-header">
+        <div class="leaveinfo-container">
+            <div class="leaveinfo">
+                @{
+                    if (LeaveReportGrid != null && LeaveReportGrid.FilterSettings.Columns != null && LeaveReportGrid.FilterSettings.Columns.Count > 0)
+                    {
+                        filteredEmployeeLeaveDetails = employeeLeaveDetails.Where(e => e.From >= startDate && e.To <= endDate).ToList();
+                    }
+                    var updatedLeaveDetails = filteredEmployeeLeaveDetails != null && filteredEmployeeLeaveDetails.Count > 0 ? filteredEmployeeLeaveDetails : employeeLeaveDetails;
+                    var casualLeave = updatedLeaveDetails.Where(e => e.AbsenceType == "Casual").ToList().Sum(e => e.Days);
+                    var sickLeave = updatedLeaveDetails.Where(e => e.AbsenceType == "Sick").ToList().Sum(e => e.Days);
+                    // var earnedLeaves = updatedLeaveDetails.Where(e => (e.AbsenceType != "Casual") && (e.AbsenceType != "Sick") && e.Status == "Approved").ToList().Sum(e => e.Days);
+                    var earnedLeaves = updatedLeaveDetails.Where(e => e.AbsenceType == "Earned").ToList().Sum(e => e.Days);
+                    var requestLeaves = updatedLeaveDetails.Where(e => e.Status == "Request").ToList().Sum(e => e.Days);
+                }
+                <b>Leave:</b>
+                <span class="e-badge badge-casual" >@casualLeave d</span>
+                Casual |
+                <span class="e-badge badge-sick">@sickLeave d</span> Sick |
+                <span class="e-badge badge-earned">@earnedLeaves d</span>
+                Earned |
+                <span class="e-badge needtoapprove">@requestLeaves d</span>
+                Request
+            </div>
+        </div>
+        <div class="daterange">
+            <SfDateRangePicker TValue="DateTime" Placeholder="Choose a period" ShowClearButton="true" @bind-StartDate="@StartDateValue" @bind-EndDate="@EndDateValue" Width="300px">
+                <DateRangePickerEvents TValue="DateTime" ValueChange="LeaveRangeChangedHandler"></DateRangePickerEvents>
+                <DateRangePickerPresets>
+                    <DateRangePickerPreset Label="This Month" Start="@monthStart" End="@monthEnd"></DateRangePickerPreset>
+                    <DateRangePickerPreset Label="Last Month" Start="@lastMonthStart" End="@lastMonthEnd"></DateRangePickerPreset>
+                    <DateRangePickerPreset Label="Last 6 Months" Start="@last6MonthStart" End="@last6MonthEnd"></DateRangePickerPreset>
+                    <DateRangePickerPreset Label="This Year" Start="@thisYearStart" End="@thisYearEnd"></DateRangePickerPreset>
+                </DateRangePickerPresets>
+            </SfDateRangePicker>
+        </div>
+    </div>
+
+    <SfGrid ID="leave_grid" @ref="LeaveReportGrid" AllowFiltering=true AllowExcelExport=true ShowColumnChooser=true DataSource="EmployeesLeaveDetails.GetAllLeaveRecords()"
+            Query="@queryData" Toolbar="@ToolbarItems" Width="100%">
+        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="EmployeesLeaveDetails"></GridEvents>
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+        <GridEditSettings AllowEditing=true></GridEditSettings>
+        @* <GridTemplates>
+            <ToolbarTemplate>
+                <SfToolbar>
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Input">
+                            <Template>
+                                <SfTextBox ValueChange="@LeaveReportSearchValueChangeHandler"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </ToolbarTemplate>
+        </GridTemplates> *@
+        <GridColumns>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.EmployeeCode)" HeaderText="ID" Visible=false Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.AttendanceID)" HeaderText="Task ID" IsPrimaryKey=true Width="140">
+                <Template>
+                    @{
+                        var leave = (context as EmployeesLeaveDetails);
+                        <a class="empid employee-popover" href="#">
+                            @leave.AttendanceID
+                        </a>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.AbsenceType)" HeaderText="Leave Type" Width="150">
+                <Template>
+                    @{
+                        var EmployeeInfo = (context as EmployeesLeaveDetails);
+                        <div>
+                            @if (EmployeeInfo.AbsenceType == "Sick")
+                            {
+                                <div id="status" class="statustemp leavetype badge-sick">
+                                    <span class="statustxt badge-sick">@EmployeeInfo.AbsenceType</span>
+                                </div>
+                            }
+                            else if (EmployeeInfo.AbsenceType == "Casual")
+                            {
+                                <div id="status" class="statustemp leavetype badge-casual">
+                                    <span class="statustxt badge-casual">@EmployeeInfo.AbsenceType</span>
+                                </div>
+                            }
+                            else if (EmployeeInfo.AbsenceType == "Earned")
+                            {
+                                <div id="status" class="statustemp leavetype badge-earned">
+                                    <span class="statustxt badge-earned">@EmployeeInfo.AbsenceType</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.ShiftName)" HeaderText="Shift Name" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.From)" Type="ColumnType.DateOnly" Format="MMM dd,yyyy" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.To)" Type="ColumnType.DateOnly" Format="MMM dd,yyyy" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.Days)" HeaderText="Day(s)"  Width="120"></GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.Status)" Width="150">
+                <Template>
+                    @{
+                        var EmployeeInfo = (context as EmployeesLeaveDetails);
+                        <div>
+                            @if (EmployeeInfo.Status == "Approved")
+                            {
+                                <div id="status" class="statustemp approved">
+                                    <span class="statustxt">@EmployeeInfo.Status</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div id="status" class="statustemp needtoapprove">
+                                    <span class="statustxt">@EmployeeInfo.Status</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn HeaderText="Approve" Visible=@approveColumnVisibility Width="120">
+                <Template>
+                    @{
+                        var EmployeeInfo = (context as EmployeesLeaveDetails);
+                        var isDisabled = false;
+                        var isChecked = EmployeeInfo.Status == "Approved";
+                        <div class="approve-icon">
+                            <SfSwitch id="checked" CssClass="e-small" Disabled=@isDisabled Checked="@isChecked" TChecked="Boolean" ValueChange="@(args => ApproveOnChange(args, EmployeeInfo))"></SfSwitch>
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(EmployeesLeaveDetails.CreatedBy)" HeaderText="Created By"  Width="150"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+@* <SfTextBox @ref="LeaveReportSearch" ValueChange="@LeaveReportSearchValueChangeHandler"></SfTextBox> *@
+@code
+{
+    SfGrid<EmployeesLeaveDetails> LeaveReportGrid { get; set; }
+    SfTextBox LeaveReportSearch { get; set; }
+    private List<Object> ToolbarItems = new List<Object>() { 
+            "ExcelExport", 
+            new ItemModel() { Text = "Click", TooltipText = "Click", PrefixIcon = "e-click", Id = "Click" },
+            // new ItemModel() { Template = LeaveReportSearch},
+            "ColumnChooser" 
+        }
+    ;
+
+    [Parameter]
+    public EmployeesDetails CurrentEmployee { get; set; }
+
+    private List<EmployeesLeaveDetails> employeeLeaveDetails { get; set; }
+    private List<EmployeesLeaveDetails> filteredEmployeeLeaveDetails { get; set; }
+
+    private bool approveColumnVisibility { get; set; } 
+
+    private Query queryData = new Query();
+    private Query updatedQueryData = new Query();
+
+    private DateTime lastMonth { get; set; }
+    private DateTime monthStart { get; set; }
+    private DateTime monthEnd { get; set; }
+    private DateTime lastMonthStart { get; set; }
+    private DateTime lastMonthEnd { get; set; }
+    private DateTime last6MonthStart { get; set; }
+    private DateTime last6MonthEnd { get; set; }
+    private DateTime thisYearStart { get; set; }
+    private DateTime thisYearEnd { get; set; }
+
+    private DateTime startDate { get; set; }
+    private DateTime endDate { get; set; }
+
+    public DateTime StartDateValue = new DateTime(DateTime.Now.Year, 1, 1);
+    public DateTime EndDateValue = new DateTime(DateTime.Now.Year, 12, 1);
+
+    private async void ApproveOnChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args, EmployeesLeaveDetails employee)
+    {
+        var getRecord = LeaveReportGrid.DataSource.Where(e => e == employee).First();
+        getRecord.Status = args.Checked ? "Approved" : "Request";
+        await LeaveReportGrid.SetRowDataAsync(getRecord.AttendanceID, getRecord);
+    }
+
+    private async Task LeaveRangeChangedHandler(RangePickerEventArgs<DateTime> args)
+    {
+        if (args != null)
+        {
+            startDate = args.StartDate;
+            endDate = args.EndDate;
+            await LeaveReportGrid.FilterByColumnAsync("From", "greaterthanorequal", args.StartDate);
+            await LeaveReportGrid.FilterByColumnAsync("To", "lessthanorequal", args.EndDate);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        lastMonth = DateTime.Now.AddMonths(-1);
+        monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        lastMonthStart = new DateTime(lastMonth.Year, lastMonth.Month, 1);
+        lastMonthEnd = lastMonthStart.AddMonths(1).AddDays(-1);
+        last6MonthStart = new DateTime(DateTime.Now.AddMonths(-6).Year, DateTime.Now.AddMonths(-6).Month, 1);
+        last6MonthEnd = last6MonthStart.AddMonths(6).AddDays(-1);
+        thisYearStart = new DateTime(DateTime.Now.Year, 1, 1);
+        thisYearEnd = new DateTime(DateTime.Now.Year, 12, 31);
+
+        if (CurrentEmployee != null)
+        {
+            queryData = new Query().Where("CreatedBy", "equal", CurrentEmployee.Name);
+            employeeLeaveDetails = EmployeesLeaveDetails.GetAllLeaveRecords().Where(e => e.Name == CurrentEmployee.Name).ToList();
+            approveColumnVisibility = employeeLeaveDetails[0].TeamLead == "Michael Anderson";
+        }
+    }
+
+    private async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (args.Item.Id.Contains("excelexport", StringComparison.OrdinalIgnoreCase))
+        {
+            await LeaveReportGrid.ExportToExcelAsync();
+        }
+    }
+
+    private async Task LeaveReportSearchValueChangeHandler(ChangedEventArgs args)
+    {
+        await LeaveReportGrid.SearchAsync(args.Value);
+    }
+}
