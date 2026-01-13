@@ -1,0 +1,1278 @@
+@page "/"
+@using OpenEventArgs = Syncfusion.Blazor.Popups.OpenEventArgs
+@rendermode InteractiveServer
+@inject NavigationManager UriHelper
+@inject IJSRuntime JS
+
+<div class="e-hotel-book">
+    <div class="e-title-bar @IsDisable">
+        <SfCarousel CssClass="api-carousel" AutoPlay="@_enableAutoPlay"  Loop="@_isLoop" Interval="1000" ButtonsVisibility="@_buttonsVisibility">
+            <ChildContent>
+                @foreach (var slide in CarouselSlides)
+                {
+                    <CarouselItem>
+                        <Template>
+                            <figure class="img-container">
+                                <img src="@UriHelper.ToAbsoluteUri($"https://cdn.syncfusion.com/blazor/images/carousel/{slide.Image}.png")" alt="@slide.AltText" style="height:100%;width:100%;" />
+                            </figure>
+                        </Template>
+                    </CarouselItem>
+                }
+            </ChildContent>
+        </SfCarousel>
+    </div>
+    <div class="e-main-container @(IsShowRoomBooking ? "invisible" : "")">
+        <div class="e-side-bar">
+            <SfSidebar Width="260px" @bind-IsOpen="SidebarToggle" EnableGestures="false" Target=@TargetElement>
+                <ChildContent>
+                    <div class="e-side-bar-operation-container">
+                        <div class="e-side-bar-separator e-side-bar-title">
+                            <div class="close-button">
+                                <span>Close <SfButton IconCss="e-icons e-close" @onclick="SidebarClose" ></SfButton></span>
+                            </div>
+                        </div>
+                        <div class="e-side-bar-separator">
+                            <div class="e-daterangepicker-container">
+                                <div class="e-semi-header-text e-check-in-out-text">Check-in date - Check-out date</div>
+                                <div>
+                                    <SfDateRangePicker TValue="DateTime" Min="@StartDateValue" @bind-StartDate="@StartDateValue" @bind-EndDate="@EndDateValue">
+                                        <DateRangePickerEvents TValue="DateTime" ValueChange="DateRangeChangeHandler"></DateRangePickerEvents>
+                                    </SfDateRangePicker>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="e-side-bar-separator">
+                            <div class="e-semi-header-text">
+                                Price Range: $<span>@DefaultPriceRange[0]</span> to $<span>@DefaultPriceRange[1]</span>
+                            </div>
+                            <div class="e-slidercomponent-container">
+                                <SfSlider TValue="int[]" Value="DefaultPriceRange" Type="SliderType.Range" Min="50" Max="1000">
+                                    <SliderTooltip IsVisible="true" ShowOn="TooltipShowOn.Focus" Placement="TooltipPlacement.After"></SliderTooltip>
+                                    <SliderEvents TValue="int[]" ValueChange="RangeSliderValueHandler"></SliderEvents>
+                                </SfSlider>
+                            </div>
+                        </div>
+                        <div class="e-line-separator">
+
+                        </div>
+                        <div class="e-side-bar-treeview-separator">
+                            <div class="treeview-component">
+                                <SfTreeView @ref="Amenitiestree" TValue="AmenitiesModel" ShowCheckBox="true" AutoCheck="true">
+                                    <TreeViewFieldsSettings TValue="AmenitiesModel" Id="Id" HasChildren="HasChild" DataSource="@AmenitiesData" Text="Amenities" ParentID="ParentId" Expanded="Expanded"></TreeViewFieldsSettings>
+                                    <TreeViewEvents TValue="AmenitiesModel" NodeChecked="AmenitiesFilterHandler"></TreeViewEvents>
+                                </SfTreeView>
+                            </div>
+                        </div>
+                        <div class="e-line-separator"></div>
+                        <div class="e-side-bar-treeview-separator">
+                            <SfTreeView @ref="RoomAmenitiesTree" TValue="AmenitiesModel" ShowCheckBox="true" AutoCheck="true">
+                                <TreeViewFieldsSettings TValue="AmenitiesModel" Id="Id" DataSource="@RoomAmenitiesData" HasChildren="HasChild" Text="Amenities" ParentID="ParentId" Expanded="Expanded"></TreeViewFieldsSettings>
+                                <TreeViewEvents TValue="AmenitiesModel" NodeChecked="RoomAmenitiesFilterHandler"></TreeViewEvents>
+                            </SfTreeView>
+                        </div>
+                    </div>
+                </ChildContent>
+            </SfSidebar>
+        </div>
+        <div class="e-app-container">
+            <div class="e-grid-container @IsDisable">
+                <SfGrid @ref="GridObj" DataSource="@Hotels" Height="100%" EnableInfiniteScrolling="true">
+                    <GridPageSettings PageSize="10"></GridPageSettings>
+                    <GridInfiniteScrollSettings InitialBlocks="1"></GridInfiniteScrollSettings>
+                    <GridTemplates>
+
+                        <RowTemplate Context="hotel">
+                            @{
+                                var hoteldetails = (hotel as HotelDataModel);
+                                IsRoomAvailable = CheckRoomAvailability(StartDateValue, EndDateValue, @hoteldetails?.CheckInOut);
+                            }
+                            <td class="e-rowtemplate-border-applier template-row primary-text-style @(IsRoomAvailable ? "" : "isnotavailable")">
+                                <div class="room-container">
+                                    <div class="e-flex-layout e-img-info-container">
+                                        <!-- Image Container -->
+                                        <div class="e-img-container">
+                                            <img src="./images/@(hoteldetails?.HotelImgID).jpg" alt="hotel-image" class="e-img" />
+                                        </div>
+
+                                        <!-- Info Container -->
+                                        <div class="e-info-container">
+                                            <div class="e-flex-layout">
+                                                <!-- Left Column: Hotel Info and Amenities -->
+                                                <div class="e-info-flex-60-width e-flex-layout e-info-flex-direction-column">
+                                                    <!-- Hotel Details Section -->
+                                                    <div class="e-row-template-separator e-info-flex-60-height">
+                                                        <div>
+                                                            <span class="e-semi-bold-header-text">@hoteldetails?.HotelName</span>
+                                                        </div>
+                                                        <div class="normal-text-color e-flex-layout e-margin-top-10">
+                                                            <span class="e-map-text-styler" style="pointer-events: @(IsRoomAvailable ? "auto" : "none");" @onclick="(() => MapshowingHandler(hoteldetails.Location))">
+                                                                <img src="./images/map.png" class="e-map-img" alt="Map" title="Show on map" />
+                                                            </span>
+                                                            <span class="e-address-text-styler">@hoteldetails?.Address</span>
+                                                        </div>
+                                                        <div class="normal-text-color e-margin-top-10">
+                                                            <span class="description-text">@hoteldetails?.Description</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Hotel Amenities Section -->
+                                                    <div class="e-row-template-separator e-info-flex-40-height">
+                                                        <span class="e-semi-header-text">Amenities:</span>
+                                                        <div class="amenities-container">
+                                                            @{
+                                                                var hotelamenities = new List<ChipItem>();
+                                                                foreach (string amenities in @hoteldetails.HotelFacility)
+                                                                {
+                                                                    hotelamenities.Add(new ChipItem { Text = amenities, CssClass = "e-info" });
+                                                                }
+                                                            }
+                                                            <SfChip Chips="@hotelamenities" Enabled="false"></SfChip>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Vertical Divider -->
+                                                <div class="vertical-divider"></div>
+
+                                                <!-- Right Column: Rating and Room Details -->
+                                                <div class="e-info-flex-40-width e-flex-layout e-info-flex-direction-column">
+                                                    <!-- Rating Section -->
+                                                    <div class="e-row-template-separator e-info-flex-50-height">
+                                                        <div>
+                                                            <span class="e-semi-header-text">Rating:</span>
+                                                        </div>
+                                                        <div class="e-flex-layout e-rating-reviews-container">
+                                                            <div>
+                                                                <SfRating ReadOnly=true Value="@hoteldetails?.Rating" CssClass="e-custom-rating-color"></SfRating>
+                                                            </div>
+                                                            <div class="e-reviews-container">
+                                                                (@hoteldetails?.ReviewCount reviews)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Room Name and Capacity Section -->
+                                                    <div class="e-row-template-separator e-info-flex-50-height">
+                                                        <div>
+                                                            <span class="e-semi-header-text">Room Name:</span> <span class="e-semi-bold-title-header-text">@hoteldetails?.RoomName</span> (@hoteldetails?.Capacity person)
+                                                        </div>
+                                                        <div class="e-below-text-styler">
+                                                            (Extra bed capacity: @hoteldetails?.ExtraBed and per bed cost: $@hoteldetails?.ExtraBedCost)
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Room Amenities Section -->
+                                                    <div class="e-row-template-separator e-info-flex-50-height">
+                                                        <span class="e-semi-header-text">Room Amenities:</span>
+                                                        <div class="room-amenities-container">
+                                                            @{
+                                                                var roomamenities = new List<ChipItem>();
+                                                                foreach (string amenities in @hoteldetails.RoomFacility)
+                                                                {
+                                                                    roomamenities.Add(new ChipItem { Text = amenities, CssClass = "e-info" });
+                                                                }
+                                                            }
+                                                            <SfChip Chips="@roomamenities" Enabled="false"></SfChip>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="e-data-line-separator"></div>
+                                    <div class="e-book-layout">
+                                        <div class="e-extralist-price-info-container">
+                                            <div class="e-extralist-container">
+                                                @{
+                                                    var paymentmode = new List<ChipItem>();
+                                                    foreach (string amenities in @hoteldetails.Extras)
+                                                    {
+                                                        paymentmode.Add(new ChipItem { Text = amenities, CssClass = "e-success" });
+                                                    }
+                                                }
+                                                <SfChip Chips="@paymentmode" Enabled=false></SfChip>
+                                            </div>
+                                            <div class="e-book-spacer"></div>
+                                            <div class="e-price-info">
+                                                <div>
+                                                    <span class="e-cost-line-through-styler">$@hoteldetails?.Price.ToString("F2")</span>
+                                                    <span class="e-cost-styler">$@hoteldetails?.OriginalPrice.ToString("F2")</span>
+                                                </div>
+                                                <div>includes @hoteldetails?.DiscountPercentage% discount (<span class="e-discount-style">-$@hoteldetails?.DiscountPrice.ToString("F2"))</span> and @hoteldetails?.TaxPercentage% tax (<span class="e-tax-style">+$@hoteldetails?.TaxPrice.ToString("F2"))</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="e-book-spacer"></div>
+                                        <div>
+                                            @if (IsRoomAvailable)
+                                            {
+                                                <div class="e-book-button">
+                                                    <SfButton @onclick="() => { if (!IsBookingDisabled) ToggleBookingRoom(hoteldetails); }" CssClass="e-primary e-outline" Content="Book Room"></SfButton>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="e-room-not-available">
+                                                    <SfButton Content="Room's not available"></SfButton>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                        </RowTemplate>
+                        <EmptyRecordTemplate>
+                            <div>
+                                <div class="empty-record-template">
+                                    <img src="images/emptyRecordTemplate.svg" class="e-emptyRecord" alt="No record">
+                                    <div>There is no hotel available to display at the moment.</div>
+                                </div>
+                            </div>
+                        </EmptyRecordTemplate>
+                    </GridTemplates>
+                    <GridColumns>
+                        <GridColumn  Width="auto" TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <div class="e-hotel-title">
+                                    <div class="e-header-flex-layout" @onclick:stopPropagation="true">
+                                        <div class="e-header-text">Hotel Information</div>
+                                           <div class="e-header-toolbar-flex-layout">
+                                                <div class="e-menu-button-container @(IsShowRoomBooking ? "invisible" : "")">
+                                                    <span><SfButton IconCss="e-icons e-menu" @onclick="OnMenuClick"></SfButton></span>
+                                                </div>
+                                                <div class="col-lg-12 control-section e-sample-resize-container">
+                                                    <SfToolbar CssClass="template" OverflowMode=OverflowMode.Scrollable>
+                                                        <ToolbarItems>
+                                                            <ToolbarItem Text="Top Rating" OnClick="RatingHandler"></ToolbarItem>
+                                                            <ToolbarItem Type="@ItemType.Separator"></ToolbarItem>
+                                                            <ToolbarItem Text="Price (Low to High)" OnClick="PriceLowToHigh"></ToolbarItem>
+                                                            <ToolbarItem Type="@ItemType.Separator"></ToolbarItem>
+                                                            <ToolbarItem Text="Price (High to Low)" OnClick="PriceHighToLow"></ToolbarItem>
+                                                        </ToolbarItems>
+                                                    </SfToolbar>
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </HeaderTemplate>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+    <div class="e-details-container @(IsShowRoomBooking ? "" : "invisible")">
+        <div class="e-details-info-container">
+            <div class="e-hotel-details-container">
+                <div class="e-header-text e-light-blue-border-bottom">
+                    <div class="e-back-button-container">
+                        <span><SfButton @onclick="@BackDefaultPage" IconCss="e-icons e-arrow-left"></SfButton></span>
+                    </div>
+                    Information
+                </div>
+                @if (Hotelinformation != null && Hotelinformation.Any())
+                {
+                    <div class="e-hotel-details-side-bar-separator">
+                        <div class="e-hotel-image">
+                            <img src="images/@(Hotelinformation[0]?.RoomImgID).jpg" alt="hotel-image" />
+                        </div>
+                    </div>
+                    <div class="e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text"> Hotel Name: </span>
+                        <span>@Hotelinformation[0].HotelName</span>
+                    </div>
+                    <div class="e-info-flex-items-center-applier e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text"> Rating: </span>
+                        <div class="rating-container">
+                            <SfRating ReadOnly=true Value="@Hotelinformation[0].Rating" CssClass="e-custom-rating-color"></SfRating>
+                        </div>
+                    </div>
+                    <div class="e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text"> Room Name: </span>
+                        <span class="e-semi-bold-title-header-text">@Hotelinformation[0].RoomName</span>
+                    </div>
+                    <div class="e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text">Capacity: </span>
+                        <span>@Hotelinformation[0].Capacity</span>
+                    </div>
+                    <div class="e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text">Amenities:</span>
+                        <div class="amenities-container">
+                            @if (Hotelinformation[0].HotelFacility != null && Hotelinformation[0].HotelFacility.Any())
+                            {
+
+                                <SfChip>
+                                    <ChipItems>
+                                        @foreach (string roomamenities in @Hotelinformation[0].HotelFacility)
+                                        {
+                                            <ChipItem Text=@roomamenities CssClass="e-info" Enabled=false></ChipItem>
+                                        }
+                                    </ChipItems>
+                                </SfChip>
+
+                            }
+                        </div>
+                    </div>
+                    <div class="e-hotel-details-side-bar-separator">
+                        <span class="e-semi-header-text">Room Amenities:</span>
+                        <div class="room-amenities-container">
+                            @if (Hotelinformation[0].RoomFacility != null && Hotelinformation[0].RoomFacility.Any())
+                            {
+
+                                <SfChip>
+                                    <ChipItems>
+                                        @foreach (string roomamenities in @Hotelinformation[0].RoomFacility)
+                                        {
+                                            <ChipItem Text=@roomamenities CssClass="e-info" Enabled=false></ChipItem>
+                                        }
+                                    </ChipItems>
+                                </SfChip>
+
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <div class="e-booking-details-container">
+                <div class="e-header-text e-light-blue-border-bottom">Booking Details</div>
+                <div class="form-container">
+                    <EditForm Model="@bookingModel" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator></DataAnnotationsValidator>
+                        <!-- Personal Information -->
+                        <div class="e-booking-details-separator">
+                            <div class="e-semi-header-text">Personal information</div>
+                            <div class="e-flex-layout e-booking-details-separator">
+                                <div class="e-info-flex-width-applier">
+                                    <label for="FirstName" class="booking-details-label">First name *</label>
+                                    <SfTextBox ID="FirstName" @bind-Value="@bookingModel.FirstName"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.FirstName)" />
+                                </div>
+                                <div class="e-info-flex-width-applier">
+                                    <label for="LastName" class="booking-details-label">Last name *</label>
+                                    <SfTextBox ID="LastName" @bind-Value="@bookingModel.LastName"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.LastName)" />
+                                </div>
+                            </div>
+                            <div class="e-flex-layout e-booking-details-separator">
+                                <div class="e-info-flex-width-applier">
+                                    <label for="Email" class="booking-details-label">Email *</label>
+                                    <SfTextBox ID="Email" @bind-Value="@bookingModel.Email" Type="InputType.Email"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.Email)" />
+                                </div>
+                                <div class="e-info-flex-width-applier">
+                                    <label for="PhoneNumber" class="booking-details-label">Phone number *</label>
+                                    <SfMaskedTextBox CssClass="@Errorclass" @bind-Value="@bookingModel.PhoneNumber" Blur="@PhonenumberValidate" Id="PhoneNumber" Mask="(999) 999-9999" />
+                                    <ValidationMessage For="@(() => bookingModel.PhoneNumber)" />
+                                    @if (!string.IsNullOrEmpty(bookingModel.PhoneNumberErrorMessage))
+                                    {
+                                        <div class="validation-message">@bookingModel.PhoneNumberErrorMessage</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Address -->
+                        <div class="e-booking-details-separator">
+                            <div class="e-semi-header-text">Current address</div>
+                            <div class="e-flex-layout e-booking-details-separator">
+                                <div class="e-info-flex-width-applier">
+                                    <label for="Address" class="booking-details-label">Address *</label>
+                                    <SfTextBox ID="Address" @bind-Value="@bookingModel.Address"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.Address)" />
+                                </div>
+                                <div class="e-info-flex-width-applier">
+                                    <label for="City" class="booking-details-label">City *</label>
+                                    <SfTextBox ID="City" @bind-Value="@bookingModel.City"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.City)" />
+                                </div>
+                            </div>
+                            <div class="e-flex-layout e-booking-details-separator">
+                                <div class="e-info-flex-width-applier">
+                                    <label for="Postcode" class="booking-details-label">Zip/Post code *</label> 
+                                    <SfTextBox ID="Postcode" @bind-Value="@bookingModel.Postcode" Type="InputType.Number"></SfTextBox>
+                                    <ValidationMessage For="@(() => bookingModel.Postcode)" />
+                                </div>
+                                <div class="e-info-flex-width-applier">
+                                    <label for="Country" class="booking-details-label">Country/Region *</label>
+                                    <SfDropDownList ID="Country" TValue="string" TItem="BookingDetails" @bind-Value="@SelectedCountryName" DataSource="@regionData">
+                                        <DropDownListFieldSettings Value="Region"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                    <ValidationMessage For="@(() => bookingModel.Region)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload ID proof (optional) -->
+                        <div class="e-booking-details-separator">
+                            <div class="e-semi-header-text">Upload ID proof (optional)</div>
+                            <div class="e-booking-details-separator">
+                                <SfUploader></SfUploader>
+                            </div>
+                        </div>
+
+                        <!-- Room Details -->
+                        @if (Hotelinformation != null && Hotelinformation.Any())
+                        {
+                            <div class="e-booking-details-separator">
+                                <div class="e-semi-header-text">Room details</div>
+                                <div class="e-roomdetails-flex-layout e-booking-details-separator">
+                                    <div class="e-roomdetails-width-applier">
+                                        <label for="NoOfPersons" class="booking-details-label">No of person (capacity: @Hotelinformation[0].Capacity)</label>
+                                        <SfNumericTextBox TValue="int" Id="NoOfPersons" Min="1" Max="@Hotelinformation[0].Capacity" @bind-Value="@Hotelinformation[0].PersonCount" />
+                                    </div>
+                                    <div class="e-roomdetails-width-applier">
+                                        <label for="ExtraBeds" class="booking-details-label">No of extra bed (capacity: @Hotelinformation[0].ExtraBed and per bed cost: $@Hotelinformation[0].ExtraBedCost)</label>
+                                        <SfNumericTextBox TValue="int" Id="ExtraBeds" Min="0" Max="@Hotelinformation[0].ExtraBed" @bind-Value="@Hotelinformation[0].SelectedBedCount" >
+                                            <NumericTextBoxEvents TValue="int" ValueChange="@ValueChangeHandler" ></NumericTextBoxEvents>
+                                        </SfNumericTextBox>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="e-data-line-separator"></div>
+                            <div class="e-book-layout">
+                                <div class="e-book-spacer"></div>
+                                <div class="e-price-info">
+                                    <div>
+                                        <span class="e-cost-line-through-styler">$@Hotelinformation[0].Price.ToString("F2")</span>
+                                        <span class="e-cost-styler">$@Hotelinformation[0].OriginalPrice.ToString("F2")</span>
+                                    </div>
+                                    <div >includes @Hotelinformation[0].DiscountPercentage% discount (<span class="e-discount-style">-$@Hotelinformation[0].DiscountPrice.ToString("F2"))</span> and @Hotelinformation[0].TaxPercentage% tax (<span class="e-tax-style">+$@Hotelinformation[0].TaxPrice.ToString("F2"))</span></div>
+                                </div>
+                                <div class="e-book-button e-book-details-button">
+                                    <SfButton type="submit" CssClass="e-primary e-outline">Book Room</SfButton>
+                                </div>
+                            </div>
+                        }
+
+                    </EditForm>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="e-print-info">
+        <div class="e-dialog-container">
+            <SfDialog ID="RoomBookDialog" @bind-Visible="@BillVisibility" IsModal="true" Width="75%" Height="75%" ShowCloseIcon="true" Target=".e-app-container">
+                <DialogEvents  Opened="@RoomBookDialogHandler" Closed="@RoomBookClosed"></DialogEvents>
+                <DialogTemplates>
+                    <Header>
+                        <div class="e-dialogHeader">Hotel room booked successfully!</div>
+                    </Header>
+                    <Content>
+                        <div class="dialogContent">
+                            <div class="e-print-info-container">
+                                <div class="e-flex-layout">
+                                    <div class="e-flex-spacer"></div>
+                                    <SfButton IconCss="e-primary e-icons e-print" @onclick="PrintinfoHandler"> Print</SfButton>
+                                </div>
+                                <div class="e-header-text e-light-blue-border-bottom e-print-info-separator">Personal Information</div>
+                                <div class="personal-info-grid-container">
+                                    <SfGrid @ref="Printinfo" DataSource="@UserData">
+                                        <GridColumns>
+                                            <GridColumn Field=@nameof(BookingDetails.FirstName) HeaderText="First Name" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(BookingDetails.LastName) HeaderText="Last Name" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(BookingDetails.Email) HeaderText="Email" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(BookingDetails.Address) HeaderText="Address" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(BookingDetails.Region) HeaderText="Country" Width="150"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                                <div class="e-header-text e-light-blue-border-bottom e-print-info-separator">Room Information</div>
+                                <div class="Hotel-info-grid-container">
+                                    <SfGrid DataSource="@RoomDetails">
+                                        <GridColumns>
+                                            <GridColumn Field=@nameof(HotelDataModel.HotelName) HeaderText="Hotel Name" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(HotelDataModel.RoomName) HeaderText="Room Name" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(HotelDataModel.PersonCount) HeaderText="No of Person" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(CheckInOut.CheckIn) HeaderText="Check In date" Width="150">
+                                                <Template>
+                                                    @{
+                                                        var checkindate = (context as HotelDataModel).CheckInOut;
+                                                        @if (checkindate != null)
+                                                        {
+                                                            <div>@checkindate[0].CheckIn.ToString("MM/dd/yyyy")</div>
+                                                        }
+
+                                                    }
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field=@nameof(CheckInOut.CheckOut) HeaderText="Check out date" Width="150">
+                                                <Template>
+                                                    @{
+                                                        var checkoutdate = (context as HotelDataModel).CheckInOut;
+                                                        @if (checkoutdate != null)
+                                                        {
+                                                            <div>@checkoutdate[0].CheckOut.ToString("MM/dd/yyyy")</div>
+                                                        }
+                                                    }
+                                                </Template>
+                                            </GridColumn>
+                                            <GridColumn Field=@nameof(HotelDataModel.SelectedBedCount) HeaderText="No of Extrabed" Width="150"></GridColumn>
+                                            <GridColumn Field=@nameof(HotelDataModel.OriginalPrice) HeaderText="Price" Width="150"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+                            </div>
+                        </div>
+                    </Content>
+                </DialogTemplates>
+            </SfDialog>
+        </div>
+    </div>
+    <div class="map-container">
+        <SfDialog ID="HotelAddressMap" @bind-Visible="@IsShowMap" Target=".e-grid-container" IsModal="true" Width="95%" Height="95%" ShowCloseIcon="true">
+            <DialogEvents Opened="@MapRenderHandler" Closed="@DialogClose"></DialogEvents>
+            <DialogTemplates>
+                <Header>
+                    <div>Location</div>
+                </Header>
+                <Content>
+                    @if (IsInitialRender)
+                    {
+                        <SfMaps ID="Maps" @ref="Maps" Height="100%" Width="auto">
+                            <MapsLayers>
+                                <MapsLayer TValue="string" ShapeData='new { dataOptions = "https://cdn.syncfusion.com/maps/map-data/usa.json" }'>
+                                    <MapsDataLabelSettings Visible="true" LabelPath="iso_3166_2" SmartLabelMode="SmartLabelMode.Hide"></MapsDataLabelSettings>
+                                    <MapsMarkerSettings>
+                                        <MapsMarker Visible="true" DataSource="@HotelAddressData" Height="20" Width="20" AnimationDuration="0" TValue="Location">
+                                            <MapsMarkerTooltipSettings Visible="true" ValuePath="TooltipContent"></MapsMarkerTooltipSettings>
+                                        </MapsMarker>
+                                    </MapsMarkerSettings>
+                                    <MapsShapeSettings Fill="#10b981"></MapsShapeSettings>
+                                </MapsLayer>
+                            </MapsLayers>
+                        </SfMaps>
+                    }
+                </Content>
+            </DialogTemplates>
+        </SfDialog>
+    </div>
+</div>
+
+@code{
+    public SfGrid<HotelDataModel> GridObj;
+    public SfGrid<BookingDetails> Printinfo;
+    public SfMaps Maps;
+    SfTreeView<AmenitiesModel> Amenitiestree;
+    SfTreeView<AmenitiesModel> RoomAmenitiesTree;
+    public string SelectedRatingType { get; set; } = "Top Rating";
+    public DateTime StartDateValue { get; set; } = DateTime.Now;
+    public DateTime EndDateValue { get; set; } = DateTime.Now.AddDays(2);
+    public int[] DefaultPriceRange { get; set; } = new int[] { 50, 1000 };
+    public bool IsShowRoomBooking { get; set; } = false;
+    public List<HotelDataModel> Hotelinformation { get; set; } = new List<HotelDataModel>();
+    public bool BillVisibility { get; set; } = false;
+    public bool IsShowMap { get; set; } = false;
+    public List<BookingDetails> UserData { get; set; } = new List<BookingDetails>();
+    public List<HotelDataModel> RoomDetails { get; set; }= new List<HotelDataModel>();
+    public List<Location> HotelAddressData { get; set; }= new List<Location>();
+    public bool IsInitialRender { get; set; }
+    public bool IsRoomAvailable { get; set; }
+    public bool IshideMap { get; set; } = false;
+    // Original dataset
+    private List<HotelDataModel> AllHotels = SampleData.GetHotels();
+    public string Errorclass { get; set; }= String.Empty;
+    public string IsDisable { get; set; }= String.Empty;
+    public bool IsBookingDisabled { get; set; } = false;
+    // Filtered datasets
+    private List<string> SelectedAmenities = new List<string>();
+    private List<string> SelectedRoomAmenities = new List<string>();
+    private List<HotelDataModel> PriceFilteredData = new List<HotelDataModel>();
+    public bool SidebarToggle { get; set; }
+    public string TargetElement { get; set; } = ".e-app-container";
+    public string CurrentImage { get; set; }
+    //Booking region
+    public string SelectedCountryName { get; set; } = "USA";
+
+    private CarouselButtonVisibility _buttonsVisibility = CarouselButtonVisibility.Visible;
+    private bool _enableAutoPlay = true;
+    private bool _isLoop = true;
+    private List<CarouselSlide> CarouselSlides = new List<CarouselSlide>()
+    {
+        new CarouselSlide{Image = "bridge", AltText = "bridge" },
+        new CarouselSlide{Image = "trees", AltText = "spring_trees" },
+        new CarouselSlide {Image = "waterfall", AltText = "waterfall" },
+        new CarouselSlide {Image = "sea", AltText = "sea" },
+        new CarouselSlide {Image = "rocks", AltText = "rocks" }
+    };
+
+    public class CarouselSlide
+    {
+        public string? Image { get; set; }
+        public string? AltText { get; set; }
+    }
+
+    public class HotelDataModel
+    {
+        public int HotelID { get; set; }
+        public string HotelName { get; set; }
+        public string Address { get; set; }
+        public string Description { get; set; }
+        public string HotelImgID { get; set; }
+        public int Rating { get; set; }
+        public int ReviewCount { get; set; }
+        public Location Location { get; set; }
+        public string[] HotelFacility { get; set; }
+        public int RoomID { get; set; }
+        public string RoomImgID { get; set; }
+        public string RoomName { get; set; }
+        public int Capacity { get; set; }
+        public int ExtraBed { get; set; }
+        public int ExtraBedCost { get; set; }
+        public int DiscountPercentage { get; set; }
+        public int TaxPercentage { get; set; }
+        public int SelectedBedCount { get; set; }
+        public int PersonCount { get; set; }
+        public string[] Extras { get; set; }
+        public string[] RoomFacility { get; set; }
+        public double Price { get; set; }
+        public double OriginalPrice { get; set; }
+        public double DiscountPrice { get; set; }
+        public double TaxPrice { get; set; }
+        public List<CheckInOut> CheckInOut { get; set; }
+        public void CalculatePrices()
+        {
+            DiscountPrice = Price * DiscountPercentage* 0.01;
+            double discountedPrice = Price - DiscountPrice;
+            TaxPrice = discountedPrice * TaxPercentage * 0.01;
+            OriginalPrice = discountedPrice + TaxPrice;
+        }
+    }
+
+    public class Location
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string TooltipContent { get; set; }
+    }
+
+    public class CheckInOut
+    {
+        public DateTime CheckIn { get; set; }
+        public DateTime CheckOut { get; set; }
+    }
+
+    public class AmenitiesModel
+    {
+        public string Id { get; set; }
+        public string ParentId { get; set; }
+        public string Amenities { get; set; }
+        public bool Expanded { get; set; }
+        public bool HasChild { get; set; }
+    }
+
+    public class RatingCategory
+    {
+        public int Id { get; set; }
+        public string RatingType { get; set; }
+    }
+    // All hotels calculated price
+    public void AllHotelCalculatedPrice()
+    {
+        foreach (var hotel in Hotels)
+        {
+            hotel.CalculatePrices();
+        }
+    }
+    //open/close the Sidebar component. 
+    public void OnMenuClick()
+    {
+        SidebarToggle = true;
+        TargetElement = "";
+        IsDisable = "disable-hotel";
+        IsBookingDisabled = true;
+    }
+
+    public void SidebarClose()
+    {
+        SidebarToggle = false;
+        TargetElement = ".e-app-container";
+        IsDisable = "";
+        IsBookingDisabled = false;
+    }
+    //Date range changing
+    public void DateRangeChangeHandler(RangePickerEventArgs<DateTime> args)
+    {
+        // Here, you can customize your code.
+        GridObj.Refresh();
+    }
+    private void ApplyFilters()
+    {
+        // Start with the original dataset
+        Hotels = AllHotels;
+
+        // Apply price filter
+        if (PriceFilteredData.Any())
+        {
+            Hotels = Hotels.Where(hotel => PriceFilteredData.Contains(hotel)).ToList();
+        }
+
+        // Apply amenities filter
+        if (SelectedAmenities.Any())
+        {
+            Hotels = Hotels.Where(hotel => SelectedAmenities.All(amenity => hotel.HotelFacility.Contains(amenity))).ToList();
+        }
+
+        // Apply room amenities filter
+        if (SelectedRoomAmenities.Any())
+        {
+            Hotels = Hotels.Where(hotel => SelectedRoomAmenities.All(amenity => hotel.RoomFacility.Contains(amenity))).ToList();
+        }
+        Hotels = Hotels.Distinct().ToList();
+        // Calculate prices and refresh grid
+        AllHotelCalculatedPrice();
+        GridObj?.Refresh();
+    }
+
+    // Price range filter handler
+    public void RangeSliderValueHandler(SliderChangeEventArgs<int[]> args)
+    {
+        DefaultPriceRange = args.Value;
+
+        PriceFilteredData = AllHotels
+            .Where(hotel => hotel.Price >= DefaultPriceRange[0] && hotel.Price <= DefaultPriceRange[1])
+            .ToList();
+
+        ApplyFilters();
+    }
+
+    // Hotel amenities filter handler
+    public void AmenitiesFilterHandler(NodeCheckEventArgs args)
+    {
+        var amenity = args.NodeData.Text;
+        var isChecked = string.Equals(args.NodeData.IsChecked, "true", StringComparison.OrdinalIgnoreCase);
+
+        // Handle the "Amenities" (select all / clear all) case first
+        if (string.Equals(amenity, "Amenities", StringComparison.Ordinal))
+        {
+            if (isChecked)
+            {
+                SelectedAmenities = AmenitiesData?.Where(a => a != null && a.Amenities != "Amenities").Select(a => a.Amenities).ToList() ?? new List<string>();
+            }
+            else
+            {
+                SelectedAmenities.Clear();
+            }
+
+            ApplyFilters();
+            return;
+        }
+
+        // Handle a regular amenity
+        if (isChecked)
+        {
+            if (!SelectedAmenities.Contains(amenity))
+                SelectedAmenities.Add(amenity);
+        }
+        else
+        {
+            SelectedAmenities.Remove(amenity);
+        }
+
+        ApplyFilters();
+    }
+
+    // Room amenities filter handler
+    public void RoomAmenitiesFilterHandler(NodeCheckEventArgs args)
+    {
+        var roomAmenity = args.NodeData.Text;
+        var isChecked = string.Equals(args.NodeData.IsChecked, "true", StringComparison.OrdinalIgnoreCase);
+
+        // Handle the "Amenities" (select all / clear all) case first
+        if (string.Equals(roomAmenity, "Room Amenities", StringComparison.Ordinal))
+        {
+            if (isChecked)
+            {
+                SelectedRoomAmenities = RoomAmenitiesData?.Where(a => a != null && a.Amenities != "Room Amenities").Select(a => a.Amenities).ToList() ?? new List<string>();
+            }
+            else
+            {
+                SelectedRoomAmenities.Clear();
+            }
+
+            ApplyFilters();
+            return;
+        }
+
+        // Handle a regular amenity
+        if (isChecked)
+        {
+            if (!SelectedRoomAmenities.Contains(roomAmenity))
+                SelectedRoomAmenities.Add(roomAmenity);
+        }
+        else
+        {
+            SelectedRoomAmenities.Remove(roomAmenity);
+        }
+
+        ApplyFilters();
+    }
+   
+    public void RatingHandler()
+    {
+        Hotels = Hotels.OrderByDescending(hotel1 => hotel1.Rating).ToList();
+        Hotels = Hotels.Distinct().ToList();
+        AllHotelCalculatedPrice();
+        GridObj?.Refresh();
+    }
+
+    public void PriceLowToHigh()
+    {
+        Hotels = Hotels.OrderBy(hotel => hotel.Price).ToList();
+        Hotels = Hotels.Distinct().ToList();
+        AllHotelCalculatedPrice();
+        GridObj?.Refresh();
+    }
+
+    public void PriceHighToLow()
+    {
+        Hotels = Hotels.OrderByDescending(hotel => hotel.Price).ToList();
+        Hotels = Hotels.Distinct().ToList();
+        AllHotelCalculatedPrice();
+        GridObj?.Refresh();
+    }
+    //Rating category data
+    List<RatingCategory> RatingCategoryData = new List<RatingCategory>
+    {
+        new RatingCategory(){Id = 1, RatingType = "Top Rating"},
+        new RatingCategory(){Id = 2, RatingType = "Price (low to high)"},
+        new RatingCategory(){Id = 3, RatingType = "Price (high to low)"},
+    };
+
+    // show map on default page 
+    public void MapshowingHandler(Location args)
+    {
+        IsShowMap = IshideMap ?  false:true;
+        HotelAddressData.Add(new Location{Latitude = args.Latitude, Longitude = args.Longitude , TooltipContent = args.TooltipContent});
+    }
+
+    //map render handler for visible purpose
+    public void MapRenderHandler()
+    {
+        IsInitialRender = true;
+    }
+    //show map closing purpose
+    private void DialogClose(Object args)
+    {
+        IsInitialRender = false;
+        HotelAddressData.Clear();
+    }
+    //Roomavailable function
+    private bool CheckRoomAvailability(DateTime startDate, DateTime endDate, List<CheckInOut>? bookings)
+    {
+        foreach (var booking in bookings)
+        {
+            // Check if the requested date range overlaps with any existing bookings
+            if ((startDate >= booking.CheckIn && startDate < booking.CheckOut) || 
+                (endDate > booking.CheckIn && endDate <= booking.CheckOut) || 
+                (startDate <= booking.CheckIn && endDate >= booking.CheckOut))
+            {
+                return false; // Room is not available
+            }
+        }
+        return true; // Room is available
+    }
+    public void ToggleBookingRoom(HotelDataModel args)
+    {
+        Hotelinformation.Add(args);
+        CurrentImage = Hotelinformation[0]?.RoomImgID;
+        IsShowRoomBooking = !IsShowRoomBooking;
+    }
+
+    public void BackDefaultPage()
+    {
+        IsShowRoomBooking = !IsShowRoomBooking;
+        Hotelinformation.Clear();
+        ResetBookingDetails();
+    }
+    // carousel component image background setting purpose
+    public void SelectedIndexHandler(int args)
+    {
+        if (Hotelinformation.Count == 0)
+        {
+            return;
+        }
+        CurrentImage = args == 0 ? Hotelinformation[0]?.HotelImgID : Hotelinformation[0]?.RoomImgID;
+    }
+    public class BookingDetails
+    {
+
+        [Required(ErrorMessage = "* Please enter your first name")]
+        public string? FirstName { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your last name")]
+        public string? LastName { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your email")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+        public string? Email { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your phone number")]
+        public string? PhoneNumber { get; set; }
+
+        public string? PhoneNumberErrorMessage { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your address")]
+        [StringLength(100, MinimumLength =5, ErrorMessage = "Address should be 5 characters long.")]
+        public string? Address { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your city")]
+        public string? City { get; set; }
+
+        [Required(ErrorMessage = "* Please enter your country")]
+        public string? Region { get; set; } 
+
+        [Required(ErrorMessage = "* Please enter your code")]
+        [StringLength(10, MinimumLength = 6,ErrorMessage = "Post code should be 6 characters long.")]
+        public string? Postcode { get; set; }
+    }
+    private void PhonenumberValidate(MaskBlurEventArgs args)
+    {
+        if (bookingModel.PhoneNumber?.Length < 10)
+        {
+            bookingModel.PhoneNumberErrorMessage = "Please enter a valid phone number.";
+            Errorclass = "e-error";
+        }
+        else
+        {
+            bookingModel.PhoneNumberErrorMessage = null; // Clear the error message if valid
+            Errorclass = String.Empty;
+        }
+
+        StateHasChanged(); // Refresh the UI to show/hide the error message
+    }
+    public List<BookingDetails> regionData = new List<BookingDetails>()
+    {
+        new BookingDetails(){Region = "USA"}
+    };
+    //extra bed price adding function
+    private void ValueChangeHandler(Syncfusion.Blazor.Inputs.ChangeEventArgs<int> args)
+    {
+        if (args.PreviousValue==null || args.Value > args.PreviousValue)
+        {
+            Hotelinformation[0].Price = Hotelinformation[0].Price + Hotelinformation[0].ExtraBedCost;
+        }
+        else if (args.Value < args.PreviousValue)
+        {
+            Hotelinformation[0].Price = Hotelinformation[0].Price - Hotelinformation[0].ExtraBedCost;
+        }
+
+        Hotelinformation[0].DiscountPrice = Hotelinformation[0].Price * Hotelinformation[0].DiscountPercentage* 0.01;
+        double discountedPrice = Hotelinformation[0].Price - Hotelinformation[0].DiscountPrice;
+        Hotelinformation[0].TaxPrice = discountedPrice * Hotelinformation[0].TaxPercentage * 0.01;
+        Hotelinformation[0].OriginalPrice = discountedPrice + Hotelinformation[0].TaxPrice;
+    }
+    //Book details form submitting process
+    private void HandleValidSubmit()
+    {
+        BillVisibility = true;
+        UserData.Add(new BookingDetails
+        {
+            FirstName = bookingModel.FirstName, LastName = bookingModel.LastName, Email = bookingModel.Email, Address = bookingModel.Address, Region = bookingModel.Region
+        });
+        if (Hotelinformation[0] != null && Hotelinformation[0].HotelID != null)
+        {
+            RoomDetails.Add(new HotelDataModel
+            {
+                RoomName = Hotelinformation[0].RoomName, HotelName = Hotelinformation[0].HotelName,
+                PersonCount = Hotelinformation[0].PersonCount, SelectedBedCount = Hotelinformation[0].SelectedBedCount,OriginalPrice = Hotelinformation[0].OriginalPrice, CheckInOut = new List<CheckInOut>{new CheckInOut{CheckIn = StartDateValue, CheckOut = EndDateValue}}
+            });
+            var hotel = Hotels.FirstOrDefault(h => h?.HotelID == Hotelinformation[0].HotelID && h?.RoomID== Hotelinformation[0].RoomID);
+            if (hotel != null)
+            {
+                hotel.CheckInOut.Add(new CheckInOut
+                {
+                    CheckIn = StartDateValue,
+                    CheckOut = EndDateValue
+                });
+            }
+        }
+
+    }
+
+    // Room booking bill print
+    public async Task PrintinfoHandler()
+    {
+        var bookedDate = Hotelinformation[0].CheckInOut;
+        var checkindate = bookedDate[0].CheckIn.ToString("MM/dd/yyyy");
+        var checkoutdate = bookedDate[0].CheckOut.ToString("MM/dd/yyyy");
+        var printContent = $@"
+    <body>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+            }}
+            .center {{
+                text-align: center;
+                margin-top: 20px;
+            }}
+            .hotel-name {{
+                font-size: 24px;
+                font-weight: 800;
+            }}
+            .hotel-address {{
+                font-size: 20px;
+            }}
+            .section-divider {{
+                width: 100%;
+                padding-top: 20px;
+                text-align: center;
+                content: '******************************';
+            }}
+            .flex-container {{
+                display: flex;
+                text-align: center;
+            }}
+            .flex-item {{
+                width: 50%;
+            }}
+            .item-title {{
+                font-size: 20px;
+                font-weight: 600;
+                margin-top: 20px;
+            }}
+            .item-content {{
+                font-size: 24px;
+            }}
+            table {{
+                width: 100%;
+                margin-top: 30px;
+            }}
+            table td {{
+                font-size: 24px;
+                padding: 10px;
+            }}
+            table .header {{
+                font-weight: 800;
+            }}
+            table .final-price {{
+                font-size: 22px;
+                font-weight: 800;
+            }}
+            .thank-you {{
+                font-size: 24px;
+                font-weight: 800;
+                padding: 10px;
+                text-align: center;
+            }}
+            .amenities, .policy {{
+                margin-top: 30px;
+                font-size: 20px;
+            }}
+            .amenities span, .policy span {{
+                font-weight: 600;
+            }}
+        </style>
+        <div class='center'>
+            <h1>Hotel Receipt</h1>
+        </div>
+        <div class='center'>
+            <div class='hotel-name'>{Hotelinformation[0].HotelName}</div>
+            <div class='hotel-address'>{Hotelinformation[0].Address}</div>
+        </div>
+        <div class='section-divider'>******************************</div>
+        <div class='flex-container'>
+            <div class='flex-item'>
+                <div class='item-title'>Check In</div>
+                <div class='item-content'>{checkindate}</div>
+
+                <div class='item-title'>Recipient name</div>
+                <div class='item-content'>{bookingModel.FirstName} {bookingModel.LastName}</div>
+
+                <div class='item-title'>Room name</div>
+                <div class='item-content'>{Hotelinformation[0].RoomName}</div>
+            </div>
+            <div class='flex-item'>
+                <div class='item-title'>Check Out</div>
+                <div class='item-content'>{checkoutdate}</div>
+
+                <div class='item-title'>Booking ID</div>
+                <div class='item-content'>{Hotelinformation[0].HotelID}</div>
+
+                <div class='item-title'>Booked date</div>
+                <div class='item-content'>{bookedDate[0].CheckIn}</div>
+            </div>
+        </div>
+        <table>
+            <tr>
+                <td class='header'>Description</td>
+                <td class='header'>Price</td>
+            </tr>
+            <tr>
+                <td>Room cost</td>
+                <td>+${Hotelinformation[0].Price}</td>
+            </tr>
+            <tr>
+                <td>Extra bed cost ({Hotelinformation[0].ExtraBedCost} * {Hotelinformation[0].SelectedBedCount})</td>
+                <td>+${Hotelinformation[0].ExtraBedCost * Hotelinformation[0].SelectedBedCount}</td>
+            </tr>
+            <tr>
+                <td>Discount {Hotelinformation[0].DiscountPercentage}%</td>
+                <td>-${Hotelinformation[0].DiscountPrice}</td>
+            </tr>
+            <tr>
+                <td>Tax {Hotelinformation[0].TaxPercentage}%</td>
+                <td>+${Hotelinformation[0].TaxPrice}</td>
+            </tr>
+            <tr>
+                <td class='final-price'>Final price</td>
+                <td class='final-price'>${Hotelinformation[0].OriginalPrice}</td>
+            </tr>
+        </table>
+        <div class='section-divider'>******************************</div>
+        <div class='thank-you'>Thank you for booking the hotel from Book My Room!</div>
+
+        <div class='amenities'>
+            <span>Room amenities: </span>{@FormatAmenities(Hotelinformation[0].RoomFacility)}
+        </div>
+
+        <div class='amenities'>
+            <span>Hotel amenities: </span>{@FormatAmenities(Hotelinformation[0].HotelFacility)}
+        </div>
+
+        <div class='policy'>
+            <span>Hotel policy: </span>{@FormatAmenities(Hotelinformation[0].Extras)}
+        </div>
+    </body>";
+
+        await JS.InvokeVoidAsync("openPrintWindow", printContent);
+        this.Printinfo.PrintAsync();
+    }
+
+
+    public static string FormatAmenities(IEnumerable<string> amenities)
+    {
+        return string.Join(", ", amenities);
+    }
+    private void ResetBookingDetails()
+    {
+        bookingModel = new BookingDetails(); // Reset to a new instance
+        bookingModel.Region = SelectedCountryName;
+    }
+
+    private void ResetAllDetails()
+    {
+
+        StartDateValue = DateTime.Now;
+        EndDateValue = DateTime.Now.AddDays(2);
+        DefaultPriceRange = new int[] { 50, 1000 };
+        Amenitiestree.UncheckAllAsync();
+        RoomAmenitiesTree.UncheckAllAsync();
+        PriceFilteredData.Clear();
+        SelectedAmenities.Clear();
+        SelectedRoomAmenities.Clear();
+        SelectedRatingType = "Top Rating";
+        ApplyFilters();
+    }
+    
+    //open room booking Dialog and room successfully booked
+    public void RoomBookDialogHandler(OpenEventArgs args)
+    {
+        IsShowRoomBooking = false;
+        ResetAllDetails();
+    }
+
+    public void RoomBookClosed()
+    {
+        ResetBookingDetails();
+        Hotelinformation.Clear();
+        UserData.Clear();
+        RoomDetails.Clear();
+    }
+}
+<style>
+    /*sidebar layout*/
+    .e-sidebar.e-left.e-open{
+        overflow-y: scroll !important;
+    }
+    .e-grid .e-headercelldiv{
+        height: auto !important;
+    }
+    .e-chip-list .e-chip{
+        background: transparent !important;
+        border-color: #a6a6a6 !important;
+    }
+    .e-back-button-container .e-btn{
+        background: unset !important;
+        border: unset !important;
+    }
+    .e-icons.e-arrow-left:before{
+        font-size: large !important;
+    }
+    .e-headercell .e-header-text {
+        padding: 14px;
+    }
+    .e-rating-container.e-custom-rating .e-rating-item-list {
+        margin: 0px;
+    }
+
+    .e-rating-container.e-custom-rating .e-rating-item-container {
+        padding-left: 0px;
+        padding-bottom: 0px;
+    }
+
+    .e-custom-rating-color.e-rating-container .e-rating-item-container.e-rating-selected .e-rating-icon {
+        background: linear-gradient(to right, #ffa600 var(--rating-value), #ffa600 var(--rating-value));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-text-stroke: 1px #ffa600;
+    }
+
+    .e-rating-container .e-rating-item-container {
+        font-size: 16px;
+    }
+    .e-book-button .e-btn{
+        border-color: #0078d6;
+        color: #0078d6;
+    }
+    .e-room-not-available .e-btn{
+        border-color: #a6a6a6 !important;
+        background-color: transparent !important;
+    }
+    .e-chip-list {
+        padding-left: 0px;
+    }
+
+    .e-chip.e-disabled.e-info {
+        margin: 6px 6px 0px 0px;
+        background: #ecfeff !important;
+        border-color: #cffafe !important;
+        color: #0e7490 !important;
+    }
+
+    .e-chip.e-disabled.e-success {
+        background: #f0fdf4 !important;
+        border-color: #bbf7d0 !important;
+        color: #15803d !important;
+    }
+
+    .e-chip.e-outline {
+        margin-left: 0px;
+    }
+
+    .e-toolbar .e-tbar-btn:focus {
+        background: #5a70cc;
+        border: 1px solid #5a70cc;
+    }
+    
+    @@media only screen and (max-width: 700px) {
+
+        .e-menu-button-container .e-btn, .close-button .e-btn {
+            background: unset !important;
+            border: unset !important;
+        }
+        .e-sidebar.e-left {
+            border: unset !important;
+        }
+        .e-sidebar.e-left.e-open {
+            width: 280px !important;
+        }
+    }
+</style>
