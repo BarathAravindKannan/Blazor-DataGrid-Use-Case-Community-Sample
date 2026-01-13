@@ -1,0 +1,202 @@
+@page "/page"
+
+<!-- Reusable pure Blazor pager with CSS magic line -->
+<div class="container">
+  <div class="mainbox">
+    <div class="pgn" @onmouseleave="() => HoverIndex = -1">
+      <ul class="pgn__list" role="navigation" aria-label="Pagination">
+        <li class="prev" title="Previous Page" style="width:@prevWidthPct%">
+          <a href="#" @onclick:preventDefault="true" @onclick="Prev"
+             @onmouseenter="SetHoverForPrev" @onmouseleave="(() => HoverIndex = -1)"
+             class="@(CurrentPage <= 1 ? "is-disabled" : null)">
+            <span class="pgn__prev-icon">‹</span>
+            <span class="pgn__prev-txt">Previous</span>
+          </a>
+        </li>
+
+        <li class="pgn__item" style="width:@mainWidthPct%">
+          @for (int i = 0; i < PagesToShow.Count; i++)
+          {
+            var token = PagesToShow[i];
+            var idx = i; // capture per-iteration index for event handlers
+
+            if (token == "...")
+            {
+              <span class="ellipsis">…</span>
+              continue;
+            }
+
+            var tempPage = int.Parse(token);
+                        if (tempPage == CurrentPage)
+            {
+                            <strong class="current" @onmouseenter="() => HoverIndex = idx" @onpointerdown="() => HoverIndex = -1">@tempPage</strong>
+            }
+            else
+            {
+                            <a href="#" @onclick:preventDefault="true" @onclick="(() => GoToPage(tempPage))"
+                @onmouseenter="() => HoverIndex = idx"
+                @onmouseleave="() => HoverIndex = -1">@tempPage</a>
+            }
+          }
+        </li>
+
+        <li class="next" title="Next Page" style="width:@prevWidthPct%">
+          <a href="#" @onclick:preventDefault="true" @onclick="Next"
+             @onmouseenter="SetHoverForNext" @onmouseleave="(() => HoverIndex = -1)"
+             class="@(CurrentPage >= TotalPages ? "is-disabled" : null)">
+            <span class="pgn__next-txt">Next</span>
+            <span class="pgn__next-icon">›</span>
+          </a>
+        </li>
+
+        <!-- Magic line representing current/hover item -->
+        <li class="pgn__magic-line" style="left:@MagicLeft% ; width:@MagicWidth%"></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  [Parameter] public int TotalPages { get; set; } = 9;
+  [Parameter] public int PageSize { get; set; } = 10; // when > 0 and TotalDataCount > 0, TotalPages will be derived
+  [Parameter] public int TotalDataCount { get; set; } = 200;
+  [Parameter] public int CurrentPage { get; set; } = 1;
+  [Parameter] public int VisibleCount { get; set; } = 7; // used for the leading block size when at the start
+  [Parameter] public EventCallback<int> CurrentPageChanged { get; set; }
+  [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private List<string> PagesToShow = new();
+    private int HoverIndex = -1; // -1 means follow current
+
+    private double prevWidthPct;    // computed based on visible count
+    private double mainWidthPct;    // central area width
+    private double itemWidthPct;    // each page item width inside central area
+
+    private int ActiveIndex => PagesToShow.FindIndex(p => int.TryParse(p, out var n) && n == CurrentPage);
+    private int IndexForLine => HoverIndex >= 0 ? HoverIndex : ActiveIndex;
+
+    private double MagicLeft => Math.Round(prevWidthPct + IndexForLine * itemWidthPct, 3);
+    private double MagicWidth => Math.Round(itemWidthPct, 3);
+
+  protected override void OnParametersSet()
+  {
+    if (VisibleCount < 3) VisibleCount = 3;
+    if (VisibleCount % 2 == 0) VisibleCount++;
+
+    if (PageSize > 0 && TotalDataCount > 0)
+    {
+      TotalPages = (int)Math.Ceiling(TotalDataCount / (double)PageSize);
+    }
+
+    if (TotalPages < 1) TotalPages = 1;
+    CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
+    BuildPages();
+    RecalcWidths();
+  }
+
+  private void BuildPages()
+  {
+    // VisibleCount controls the size of the main block either before or after the dots
+    // depending on proximity to start/end. Always include first two and last two when separated by a gap.
+
+    // If small total, show all
+    if (TotalPages <= VisibleCount + 4)
+    {
+      PagesToShow = Enumerable.Range(1, TotalPages).Select(i => i.ToString()).ToList();
+      return;
+    }
+
+    int k = VisibleCount;
+    if (k < 3) k = 3; // safety
+    if (k % 2 == 0) k++; // enforce odd
+
+    int windowStart, windowEnd;
+    if (CurrentPage <= k)
+    {
+      // main block at the start
+      windowStart = 1;
+      windowEnd = k;
+    }
+    else if (CurrentPage >= TotalPages - k + 1)
+    {
+      // main block at the end
+      windowStart = TotalPages - k + 1;
+      windowEnd = TotalPages;
+    }
+    else
+    {
+      int half = k / 2;
+      windowStart = CurrentPage - half;
+      windowEnd = CurrentPage + half;
+    }
+
+    var set = new SortedSet<int>();
+    // first two
+    set.Add(1);
+    set.Add(2);
+    // main window
+    for (int i = windowStart; i <= windowEnd; i++)
+      set.Add(Math.Clamp(i, 1, TotalPages));
+    // last two
+    set.Add(TotalPages - 1);
+    set.Add(TotalPages);
+
+    // Build tokens with ellipsis between gaps
+    var ordered = set.ToList();
+    var tokens = new List<string>();
+    for (int i = 0; i < ordered.Count; i++)
+    {
+      tokens.Add(ordered[i].ToString());
+      if (i < ordered.Count - 1 && ordered[i + 1] - ordered[i] > 1)
+      {
+        tokens.Add("...");
+      }
+    }
+
+    PagesToShow = tokens;
+  }
+
+  private void RecalcWidths()
+  {
+    var visible = Math.Max(1, PagesToShow.Count);
+    prevWidthPct = 100.0 / (visible + 2);
+    mainWidthPct = 100.0 - 2 * prevWidthPct;
+    itemWidthPct = mainWidthPct / visible;
+  }
+
+
+    private async Task GoToPage(int page)
+    {
+
+        HoverIndex = -1;
+        if (page < 1 || page > TotalPages || page == CurrentPage) return;
+    CurrentPage = page;
+    BuildPages();
+    RecalcWidths();
+    HoverIndex = PagesToShow.FindIndex(p => int.TryParse(p, out var n) && n == CurrentPage); // ensure line snaps immediately
+    if (CurrentPageChanged.HasDelegate) await CurrentPageChanged.InvokeAsync(CurrentPage);
+    if (OnPageChanged.HasDelegate) await OnPageChanged.InvokeAsync(CurrentPage);
+  }
+
+  private void SetHoverForPrev()
+  {
+    if (CurrentPage <= 1) return;
+    SetHoverForPage(CurrentPage - 1);
+  }
+
+  private void SetHoverForNext()
+  {
+    if (CurrentPage >= TotalPages) return;
+    SetHoverForPage(CurrentPage + 1);
+  }
+
+  private void SetHoverForPage(int page)
+  {
+    var idx = PagesToShow.FindIndex(t => int.TryParse(t, out var n) && n == page);
+    if (idx >= 0) HoverIndex = idx;
+  }
+
+  private Task Prev() => GoToPage(CurrentPage - 1);
+  private Task Next() => GoToPage(CurrentPage + 1);
+}

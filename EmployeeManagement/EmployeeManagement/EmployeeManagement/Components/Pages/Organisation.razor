@@ -20,8 +20,20 @@
                       </ChildContent>
                       <ContentTemplate>
                           <div class="tab-content teamGridContainer">
-                            <SfGrid DataSource="EmployeesDetails.GetAllEmployeeRecords()" Height="400" Width="100%" ID="employees_grid" AllowPaging=true AllowGrouping=true AllowSorting=true AllowFiltering=true ShowColumnChooser=true Toolbar="@(new List<string>() { "ColumnChooser", "Search" })" RowHeight="50">
-                                    <GridPageSettings PageSize="10"></GridPageSettings>
+                            <SfGrid @ref="OrganisationGrid" DataSource="EmployeesDetails.GetAllEmployeeRecords()" Height="400" Width="100%" ID="employees_grid" AllowPaging=true AllowGrouping=true AllowSorting=true AllowFiltering=true ShowColumnChooser=true Toolbar="@(new List<string>() { "ColumnChooser", "Search" })" RowHeight="50">
+                                    <GridPageSettings PageSize="10">
+                                        <Template>
+                                            @{
+                                                var p = (context as PagerTemplateContext);
+                                            }
+                                            <PageComponent PageSize="@p.PageSize"
+                                                           TotalDataCount="@p.TotalItemsCount"
+                                                           CurrentPage="@p.CurrentPage"
+                                                           VisibleCount="7"
+                                                           OnPageChanged="@(async (int newPage) => await OrganisationGrid.GoToPageAsync(newPage))"
+                                                           CurrentPageChanged="@(async (int newPage) => await OrganisationGrid.GoToPageAsync(newPage))" />
+                                        </Template>
+                                    </GridPageSettings>
                                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
                                     <GridColumns>
                                         <GridColumn HeaderText="Image" Width="80" AllowFiltering=false AllowSorting=false AllowGrouping=false TextAlign="TextAlign.Center">
@@ -134,7 +146,7 @@
 @code{
     // [Parameter]
     // public EventCallback<EmployeesDetails> SelectedEmployee { get; set; }
-
+    SfGrid<EmployeesDetails> OrganisationGrid { get; set; }
     private void RecordClickHandler(EmployeesDetails employee)
     {
         // UriHelper.NavigateTo($"{Orders.Link}/{Orders.EmployeeID.ToString()}/{Orders.Name}/{Orders.Title}");

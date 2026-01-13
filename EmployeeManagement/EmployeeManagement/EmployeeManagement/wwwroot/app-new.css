@@ -34,6 +34,11 @@
 @import url('./css/utilities/typography.css');
 @import url('./css/utilities/error-handling.css');
 
+
+
+/* ========== PAGE Component ========== */
+@import url('./PageComponent.css');
+
 /* ========================================
    NOTE: Bootstrap5.css is loaded separately in App.razor
    Load order: app.css (custom) → Bootstrap5.css

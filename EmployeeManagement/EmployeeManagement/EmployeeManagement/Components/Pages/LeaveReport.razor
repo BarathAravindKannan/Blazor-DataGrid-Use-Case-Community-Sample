@@ -2,6 +2,7 @@
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
+@using EmployeeManagement.Components.Pages
 @using static EmployeeManagement.Components.Pages.Home
 
 <div class="tab-content">
@@ -44,10 +45,23 @@
     </div>
 
     <SfGrid ID="leave_grid" @ref="LeaveReportGrid" AllowFiltering=true AllowExcelExport=true ShowColumnChooser=true DataSource="EmployeesLeaveDetails.GetAllLeaveRecords()"
-            Query="@queryData" Toolbar="@ToolbarItems" Width="100%">
+            Query="@queryData" Toolbar="@ToolbarItems" Width="100%" AllowPaging="true">
         <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="EmployeesLeaveDetails"></GridEvents>
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
         <GridEditSettings AllowEditing=true></GridEditSettings>
+        <GridPageSettings PageSize="10">
+            <Template>
+                @{
+                    var p = (context as PagerTemplateContext);
+                }
+                <PageComponent PageSize="@p.PageSize"
+                               TotalDataCount="@p.TotalItemsCount"
+                               CurrentPage="@p.CurrentPage"
+                               VisibleCount="7"
+                               OnPageChanged="@(async (int newPage) => await LeaveReportGrid.GoToPageAsync(newPage))"
+                               CurrentPageChanged="@(async (int newPage) => await LeaveReportGrid.GoToPageAsync(newPage))" />
+            </Template>
+        </GridPageSettings>
         @* <GridTemplates>
             <ToolbarTemplate>
                 <SfToolbar>
