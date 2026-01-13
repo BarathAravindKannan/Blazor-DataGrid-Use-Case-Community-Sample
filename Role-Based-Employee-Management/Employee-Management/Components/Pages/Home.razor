@@ -1,0 +1,41 @@
+@page "/"
+@rendermode InteractiveServer
+@using Models
+@using Services
+
+<PageTitle>SummitBridge Workforce Portal</PageTitle>
+
+@if (currentUser == null)
+{
+    <Login OnLoginSuccess="HandleLoginSuccess" />
+}
+else
+{
+    <div class="app-container">
+        <Navbar User="currentUser" Title="@APPLICATION_TITLE" OnLogout="HandleLogout" />
+        <main class="content-wrapper">
+            <EmployeeGrid CurrentRole="@currentUser.Role" OnGridDataChanged="HandleGridDataChanged" />
+        </main>
+    </div>
+}
+
+@code {
+    private const string APPLICATION_TITLE = "SummitBridge Workforce Portal";
+    private UserAccount? currentUser = null;
+
+    private void HandleLoginSuccess(UserAccount user)
+    {
+        currentUser = user;
+    }
+
+    private void HandleLogout()
+    {
+        currentUser = null;
+    }
+
+    private async Task HandleGridDataChanged()
+    {
+        // Handle grid data changes if needed
+        await Task.CompletedTask;
+    }
+}

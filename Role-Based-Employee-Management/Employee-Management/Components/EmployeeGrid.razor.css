@@ -1,0 +1,44 @@
+/* Employee Grid Container */
+.grid-container {
+  height: 83vh;
+}
+
+.grid-header-template {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.grid-header-template.e-icons, .grid-header-template .e-icons {
+    position: relative;
+    bottom: -.5px;
+}
+
+.e-chip-list.chip-rounded,
+.e-chip-list .chip-rounded {
+    border-radius: 50px;
+}
+
+.grid-chip-center {
+    display: flex;
+    justify-content: center;
+}
+
+.grid-chip-center .e-chip-list {
+    justify-content: center;
+}
+
+.grid-chip-center .e-chip.e-success {
+    background: rgba(110, 231, 183, 0.35);
+    border-color: rgba(16, 185, 129, 0.65);
+    color: #047857;
+}
+
+.grid-chip-center .e-chip.e-danger {
+    background: rgba(252, 165, 165, 0.35);
+    border-color: rgba(239, 68, 68, 0.65);
+    color: #b91c1c;
+}
+

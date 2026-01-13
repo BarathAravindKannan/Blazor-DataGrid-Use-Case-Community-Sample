@@ -1,0 +1,126 @@
+@page "/login"
+@rendermode InteractiveServer
+@using Models;
+@using Services;
+@inject GridConfigService GridConfigService
+
+<PageTitle>Login - SummitBridge Workforce Portal</PageTitle>
+
+<div class="login-screen">
+    <div class="card shadow-sm login-card">
+        <div class="card-body p-4">
+            <h2 class="card-title text-center mb-4">Sign in</h2>
+
+            <form class="d-grid gap-3" @onsubmit="HandleLogin">
+
+                <div class="form-field-inline">
+                    <label for="userId" class="form-label form-label-inline">
+                        User ID: <span class="field-accent" />
+                    </label>
+                    <SfTextBox @ref=@userInputRef
+                        Created="@AddUserIcon"
+                        Type="InputType.Text" 
+                        Id="userId" 
+                        placeholder="Enter your user ID"
+                        @bind-Value="credentials.UserId"/>
+                </div>
+
+                <div class="form-field-inline">
+                    <label for="password" class="form-label form-label-inline">
+                        Password: <span class="field-accent" />
+                    </label>
+                    <SfTextBox 
+                        @ref=@passwordInputRef
+                        Created="@AddPasswordIcon"
+                        Type="InputType.Password" 
+                        Id="password" 
+                        placeholder="Enter your password"
+                        @bind-Value="credentials.Password"/>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span class="alert-icon">⚠</span>
+                        <span>@errorMessage</span>
+                        @* <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button> *@
+                    </div>
+                }
+
+                <div class="login-actions">
+                     <SfButton type="submit" CssClass="login-submit-btn" IsPrimary="true">Login</SfButton>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginCredentials credentials = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+    SfTextBox userInputRef { get; set; }
+    SfTextBox passwordInputRef { get; set; }
+
+    [Parameter]
+    public EventCallback<UserAccount> OnLoginSuccess { get; set; }
+
+    private async void AddUserIcon()
+    {
+        if (userInputRef != null)
+        {
+            await userInputRef.AddIconAsync("prepend", "e-icons e-user");
+        }
+    }
+
+    private async void AddPasswordIcon()
+    {
+        if (passwordInputRef != null)
+        {
+            await passwordInputRef.AddIconAsync("prepend", "e-icons e-lock");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        // Reset error message
+        errorMessage = string.Empty;
+
+        // Validate inputs
+        if (string.IsNullOrWhiteSpace(credentials.UserId) || string.IsNullOrWhiteSpace(credentials.Password))
+        {
+            errorMessage = "User ID and Password are required";
+            return;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            // Authenticate user
+            var response = GridConfigService.AuthenticateUser(credentials);
+
+            if (response.IsSuccess && response.User != null)
+            {
+                // Call parent callback with user account
+                await OnLoginSuccess.InvokeAsync(response.User);
+                
+                // Reset form
+                credentials = new();
+            }
+            else
+            {
+                errorMessage = response.Message ?? "Authentication failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

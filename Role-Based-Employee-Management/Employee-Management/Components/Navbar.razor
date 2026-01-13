@@ -1,0 +1,96 @@
+@using Models;
+@using Services;
+
+<nav class="navbar app-navbar shadow-sm fixed-top">
+    <div class="container-fluid">
+        <span class="navbar-brand fw-semibold">
+            @Title
+        </span>
+
+        <div class="profile-menu-wrapper">
+            <button class="btn profile-pill fw-semibold" @onclick="ToggleMenu" aria-expanded="@isMenuOpen" aria-haspopup="true" type="button">
+                <div class="profile-pill-text">
+                    <span class="profile-pill-name">@FormatUserName(User?.UserId)</span>
+                    <span class="profile-pill-role">@User?.Role</span>
+                </div>
+                <span class="@($"chevron {(isMenuOpen ? "open" : "")}")"></span>
+            </button>
+
+            @if (isMenuOpen)
+            {
+                <div class="profile-menu">
+                    <div class="profile-menu__header">
+                        <div class="profile-menu__label">Manage account</div>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            @GetUserInitial(User?.UserId)
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-info__name">@FormatUserName(User?.UserId)</div>
+                            <div class="profile-info__meta">
+                               @User?.UserId
+                                <span class="profile-info__role">@User?.Role</span>
+                            </div>
+                            <div class="profile-info__email">@(User?.UserId)example.org</div>  
+                        </div>
+                    </div>
+
+                    <div class="profile-menu__actions">
+                        <button class="profile-action" @onclick="HandleLogout">
+                            <span class="e-icons e-export" /> Logout
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</nav>
+
+@code {
+    [Parameter]
+    public UserAccount? User { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "Application";
+
+    [Parameter]
+    public EventCallback OnLogout { get; set; }
+
+    private bool isMenuOpen = false;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private async Task HandleLogout()
+    {
+        isMenuOpen = false;
+        await OnLogout.InvokeAsync();
+    }
+
+    private string GetUserInitial(string? userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return "?";
+
+        // Extract first letter from userId
+        // If format is "FirstName.LastName", get first letter
+        var parts = userId.Split('.');
+        return parts[0].FirstOrDefault().ToString().ToUpper();
+    }
+
+    private string FormatUserName(string? userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return "User";
+
+        // Format "john.doe" to "John Doe"
+        var parts = userId.Split('.');
+        var formatted = string.Join(" ", parts.Select(p => 
+            char.ToUpper(p[0]) + (p.Length > 1 ? p.Substring(1) : "")));
+        return formatted;
+    }
+}

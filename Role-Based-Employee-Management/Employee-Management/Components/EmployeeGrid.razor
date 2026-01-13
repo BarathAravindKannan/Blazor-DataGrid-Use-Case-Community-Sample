@@ -1,0 +1,287 @@
+@inject DataSourceService DataSourceService
+@inject GridConfigService GridConfigService
+@rendermode InteractiveServer
+@using Models
+@using Services
+@using Syncfusion.Blazor.Grids
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="grid-container">
+            <SfGrid @ref="gridRef"
+                    DataSource="@employeeData"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    AllowSelection="true"
+                    Toolbar="@GetToolbarItems()"
+                    Height="100%"
+                    RowHeight="48">
+
+                <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Single" Mode="SelectionMode.Row" CheckBoxOnly="false"></GridSelectionSettings>
+                <GridFilterSettings Type="FilterType.Menu"></GridFilterSettings>
+                <GridPageSettings PageSize="20"></GridPageSettings>
+                <GridEditSettings AllowAdding="@isAdd" AllowEditing="@isEdit" AllowDeleting="@isDelete" Mode="EditMode.Normal"></GridEditSettings>
+                <GridColumns>
+                @foreach (var column in GetVisibleColumns())
+                {
+                    @if (column.Field == "Active")
+                    {
+                        <GridColumn Field="@column.Field"
+                                    Type="@column.Type"
+                                    Format="@column.Format"
+                                    Width="@column.Width"
+                                    TextAlign="@column.TextAlign"
+                                    AllowEditing="@GetAllowEditing(column.Field)">
+                            <HeaderTemplate>
+                                    <div>
+                                        <span class="e-icons @column.Icons"></span> @column.HeaderText
+                                    </div>
+                            </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var employee = context as Employee;
+                                    if (employee != null)
+                                    {
+                                        <div class="cell-template status-template">
+                                            <div class="grid-chip-center">
+                                                <SfChip>
+                                                    <ChipItems>
+                                                            <ChipItem Text="@(employee.Active ? "Active" : "Inactive")" CssClass="@(employee.Active ? "e-success chip-rounded" : "e-danger chip-rounded")"></ChipItem>
+                                                    </ChipItems>
+                                                </SfChip>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </Template>
+                        </GridColumn>
+                    }
+                    else if (column.Field == "Email")
+                    {
+                        <GridColumn Field="@column.Field"
+                                    Type="@column.Type"
+                                    Format="@column.Format"
+                                     Width="@column.Width"
+                                    TextAlign="@column.TextAlign"
+                                    AllowEditing="@GetAllowEditing(column.Field)">
+                                <HeaderTemplate>
+                                    <div>
+                                        <span class="e-icons @column.Icons"></span> @column.HeaderText
+                                    </div>
+                                </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var employee = context as Employee;
+                                    if (employee != null)
+                                    {
+                                        <div class="cell-template email-template">
+                                            <a href="mailto:@employee.Email">
+                                                @employee.Email
+                                            </a>
+                                        </div>
+                                    }
+                                }
+                            </Template>
+                        </GridColumn>
+                    }
+                    else if (column.Field == "Rating")
+                    {
+                        <GridColumn Field="@column.Field"
+                                    Type="@column.Type"
+                                    Format="@column.Format"
+                                     Width="@column.Width"
+                                    TextAlign="@column.TextAlign"
+                                    AllowEditing="@GetAllowEditing(column.Field)">
+                                <HeaderTemplate>
+                                    <div>
+                                        <span class="e-icons @column.Icons"></span> @column.HeaderText
+                                    </div>
+                                </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var employee = context as Employee;
+                                    if (employee != null)
+                                    {
+                                        <div class="cell-template rating-template">
+                                            <div style = "transform: scale(0.5); transform-origin: left center;" >
+                                                <SfRating Value="@employee.Rating" ReadOnly="true"/>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </Template>
+                        </GridColumn>
+                    }
+                    else
+                    {
+                        <GridColumn Field="@column.Field"
+                                    Type="@column.Type"
+                                    Format="@column.Format"
+                                     Width="@column.Width"
+                                    TextAlign="column.TextAlign"
+                                    IsPrimaryKey="@column.IsPrimaryKey"
+                                    AllowEditing="@GetAllowEditing(column.Field)">
+                                <HeaderTemplate>
+                                    <div>
+                                        <span class="e-icons @column.Icons"></span> @column.HeaderText
+                                    </div>
+                                </HeaderTemplate>
+                        </GridColumn>
+                    }
+                }
+                </GridColumns>
+
+                <GridEvents OnActionBegin="OnActionBegin" TValue="Employee"></GridEvents>
+            </SfGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+
+    private SfGrid<Employee> gridRef = null!;
+    private List<Employee> employeeData = new();
+    private RoleKey currentRole;
+
+    private bool isEdit = true;
+    private bool isAdd = true;
+    private bool isDelete = true;
+
+    [Parameter]
+    public RoleKey CurrentRole { get; set; }
+
+    [Parameter]
+    public EventCallback OnGridDataChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        currentRole = CurrentRole;
+        LoadEmployeeData();
+        if (currentRole == RoleKey.Employee)
+        {
+            isEdit = false;
+            isAdd = false;
+            isDelete = false;
+        }
+    }
+
+    private void LoadEmployeeData()
+    {
+        employeeData = DataSourceService.GenerateEmployees(100);
+    }
+
+    private List<string> GetToolbarItems()
+    {
+        var roleConfig = GridConfigService.GetRoleConfig(currentRole);
+        var toolbar = new List<string>();
+
+        if (roleConfig.CanAdd)
+        {
+            toolbar.Add("Add");
+        }
+
+        if (roleConfig.CanEdit)
+        {
+            toolbar.Add("Edit");
+        }
+
+        if (roleConfig.CanDelete)
+        {
+            toolbar.Add("Delete");
+        }
+
+        if (currentRole != RoleKey.Employee)
+        {
+            toolbar.Add("Update");
+            toolbar.Add("Cancel");
+        }
+
+
+        // Search box
+        toolbar.Add("Search");
+
+        return toolbar;
+    }
+
+    private List<ColumnDefinition> GetVisibleColumns()
+    {
+        var roleConfig = GridConfigService.GetRoleConfig(currentRole);
+        var allColumns = GetAllColumnDefinitions();
+
+        return allColumns
+            .Where(c => roleConfig.VisibleColumns.Contains(c.Field))
+            .ToList();
+    }
+
+    private bool GetAllowEditing(string fieldName)
+    {
+        var roleConfig = GridConfigService.GetRoleConfig(currentRole);
+
+        // Read-only fields
+        if (fieldName == "Id" || fieldName == "FullName" || fieldName == "Email" || fieldName == "JoinDate")
+        {
+            return false;
+        }
+
+        // Only allow editing if role has edit permission
+        if (!roleConfig.CanEdit)
+        {
+            return false;
+        }
+
+        // Manager can only edit Rating and Contact
+        if (currentRole == RoleKey.Manager)
+        {
+            return fieldName == "Rating" || fieldName == "Contact";
+        }
+
+        return true;
+    }
+
+    private List<ColumnDefinition> GetAllColumnDefinitions()
+    {
+        return new List<ColumnDefinition>
+        {
+            new ColumnDefinition { Field = "Id", HeaderText = "ID", Width = "100", TextAlign = TextAlign.Right, Type = ColumnType.String, IsPrimaryKey = true },
+            new ColumnDefinition { Field = "FullName", HeaderText = "Name", Width = "180", Type = ColumnType.String, Icons = "e-user" },
+            new ColumnDefinition { Field = "Title", HeaderText = "Title", Width = "160", Type = ColumnType.String },
+            new ColumnDefinition { Field = "Department", HeaderText = "Department", Width = "160", Type = ColumnType.String },
+            new ColumnDefinition { Field = "Role", HeaderText = "Role", Width = "140", Type = ColumnType.String },
+            new ColumnDefinition { Field = "Email", HeaderText = "Email", Width = "260", Type = ColumnType.String, Icons = "e-send" },
+            new ColumnDefinition { Field = "Contact", HeaderText = "Contact",TextAlign = TextAlign.Center, Width = "180", Type = ColumnType.String, Icons = "e-people" },
+            new ColumnDefinition { Field = "JoinDate", HeaderText = "Join Date", TextAlign = TextAlign.Right, Width = "150", Type = ColumnType.DateTime, Format = "d", Icons = "e-day" },
+            new ColumnDefinition { Field = "Active", HeaderText = "Active", TextAlign = TextAlign.Center, Width = "110", Type = ColumnType.Boolean, Icons = "e-select-all" },
+            new ColumnDefinition { Field = "Rating", HeaderText = "Rating", Width = "120",Type = ColumnType.Integer, Icons = "e-star-filled" },
+            new ColumnDefinition { Field = "Salary", HeaderText = "Salary", TextAlign = TextAlign.Right, Width = "130", Type = ColumnType.Decimal, Format = "C2" },
+        };
+    }
+
+    private async Task OnActionBegin(ActionEventArgs<Employee> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save)
+        {
+            // Handle save action
+            await OnGridDataChanged.InvokeAsync();
+        }
+        else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Delete)
+        {
+            // Handle delete action
+            await OnGridDataChanged.InvokeAsync();
+        }
+    }
+
+    public class ColumnDefinition
+    {
+        public string Field { get; set; } = string.Empty;
+        public string HeaderText { get; set; } = string.Empty;
+        public string? Width { get; set; }
+        public ColumnType Type { get; set; }
+        public string? Format { get; set; }
+        public bool IsPrimaryKey { get; set; }
+        public TextAlign TextAlign{ get; set; }
+        public string? Icons {get; set; }
+    }
+}
